@@ -12,7 +12,7 @@ use regex::Regex;
 use crate::{spec::Spec, tmux};
 
 #[derive(Parser)]
-#[grammar = "quoted-spec.pest"]
+#[grammar = "quoted-string.pest"]
 struct QuotedParser;
 
 pub fn load_specs() -> Result<Vec<Spec>> {
@@ -40,7 +40,7 @@ fn load_specs_from_config(config_path: &Path) -> Result<Vec<String>> {
         })
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
-        .map(|s| match QuotedParser::parse(Rule::quoted_spec, &s) {
+        .map(|s| match QuotedParser::parse(Rule::quoted_string, &s) {
             Ok(mut pairs) => Ok(
                 pairs.next()
                     .expect("there should be one pair after parsing because parsing would have failed earlier")

@@ -1,4 +1,4 @@
-quoted_spec = { single_quoted | double_quoted }
+quoted_string = { single_quoted | double_quoted }
 
 single_quoted = { "'" ~ (!"'" ~ ANY)* ~ "'" }
 double_quoted = { "\"" ~ (escaped_char | normal_char)* ~ "\"" }
