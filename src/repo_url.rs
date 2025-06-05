@@ -2,7 +2,7 @@ use std::fmt::{self, Display};
 
 use url::Url;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum RepoUrl {
     Short(String),
 }

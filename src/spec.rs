@@ -5,7 +5,7 @@ use pest_derive::Parser;
 
 use crate::repo_url::RepoUrl;
 
-#[derive(Debug, Getters, PartialEq)]
+#[derive(Debug, Getters, PartialEq, Clone)]
 pub struct Spec {
     #[getset(get = "pub")]
     name: String,
