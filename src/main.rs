@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use cmd_lib::run_cmd;
 use tpm_rs::{
+    plugin::Plugin,
     plugins,
     tmux::{self, get_option},
 };
@@ -23,9 +24,11 @@ fn main() -> Result<()> {
     let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
 
     for spec in specs {
-        let url: Url = spec.url().into();
-        let name = spec.name();
-        println!("\nInstalling {}", spec.name());
+        let plugin = Plugin::from(spec);
+        let url: Url = plugin.url();
+        let name = plugin.name();
+
+        println!("\nInstalling {}", plugin);
 
         run_cmd!(
             cd /tmp;
