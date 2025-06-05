@@ -85,9 +85,7 @@ pub fn install_plugins() -> Result<()> {
 
         run_cmd!(
             cd /tmp;
-            rm -rf tmux-plugins;
-            mkdir -p tmux-plugins;
-            echo git clone $url $plugins_dir/$name;
+            git clone $url $plugins_dir/$name;
         )?;
     }
 
