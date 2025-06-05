@@ -1,0 +1,8 @@
+spec      = _{ SOI ~ short_url ~ ("#" ~ branch)? ~ EOI }
+short_url =  { user ~ "/" ~ repo }
+
+user   = @{ ident }
+repo   = @{ ident }
+branch = @{ ident ~ ("/" ~ ident)? }
+
+ident = { (ASCII_ALPHA | ASCII_DIGIT | "_" | "-")+ }

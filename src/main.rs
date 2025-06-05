@@ -8,9 +8,9 @@ fn main() -> Result<()> {
 
     let specs = plugins::load_specs()?;
 
-    println!("Plugins:");
+    println!("\nPlugins:");
     for spec in specs {
-        println!("  {}", spec.plugin());
+        println!("  {}", spec.url());
     }
 
     Ok(())
