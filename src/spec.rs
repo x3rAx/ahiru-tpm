@@ -19,17 +19,17 @@ pub struct Spec {
 #[grammar = "spec.pest"]
 struct SpecParser;
 
-impl TryFrom<String> for Spec {
+impl TryFrom<&str> for Spec {
     type Error = anyhow::Error;
 
-    fn try_from(value: String) -> Result<Self> {
+    fn try_from(value: &str) -> Result<Self> {
         if value.is_empty() {
             Err(anyhow!("Plugin spec must not be empty"))
         } else if value.contains(';') {
             Err(anyhow!("Attributes are not supported yet")
                 .context(format!("Failed to parse: {value}")))
         } else {
-            parse_spec(&value)
+            parse_spec(value)
         }
     }
 }
