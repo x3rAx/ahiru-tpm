@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use url::Url;
 
-use crate::spec::Spec;
+use crate::{spec::Spec, tmux};
 
 pub struct Plugin {
     spec: Spec,
@@ -15,6 +15,10 @@ impl Plugin {
 
     pub fn name(&self) -> &str {
         self.spec.name()
+    }
+
+    pub fn is_installed(&self) -> Option<bool> {
+        tmux::get_plugins_dir().map(|p| p.join(self.name()).exists())
     }
 }
 

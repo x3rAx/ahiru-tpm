@@ -74,6 +74,13 @@ pub fn install_plugins() -> Result<()> {
         let url = plugin.url();
         let name = plugin.name();
 
+        if plugin
+            .is_installed()
+            .context("Failed to check if plugin is installed")?
+        {
+            continue;
+        }
+
         println!("\nInstalling {}", plugin);
 
         run_cmd!(
