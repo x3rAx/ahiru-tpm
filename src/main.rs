@@ -1,11 +1,8 @@
-use anyhow::{Context, Result};
-use cmd_lib::run_cmd;
+use anyhow::Result;
 use tpm_rs::{
-    plugin::Plugin,
-    plugins,
+    plugins::{self, install_plugins},
     tmux::{self, get_option},
 };
-use url::Url;
 
 fn main() -> Result<()> {
     let tpm_async = get_option("@tpm_async").unwrap_or("".into()) == "true";
@@ -21,22 +18,7 @@ fn main() -> Result<()> {
 
     println!("\nPlugins dir: {:?}", tmux::get_plugins_dir());
 
-    let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
-
-    for spec in specs {
-        let plugin = Plugin::from(spec);
-        let url: Url = plugin.url();
-        let name = plugin.name();
-
-        println!("\nInstalling {}", plugin);
-
-        run_cmd!(
-            cd /tmp;
-            rm -rf tmux-plugins;
-            mkdir -p tmux-plugins;
-            echo git clone $url $plugins_dir/$name;
-        )?;
-    }
+    install_plugins()?;
 
     println!("\nDone\n");
 

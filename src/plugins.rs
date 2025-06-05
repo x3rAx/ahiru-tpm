@@ -5,11 +5,12 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow};
+use cmd_lib::run_cmd;
 use pest::Parser;
 use pest_derive::Parser;
 use regex::Regex;
 
-use crate::{spec::Spec, tmux};
+use crate::{plugin::Plugin, spec::Spec, tmux};
 
 #[derive(Parser)]
 #[grammar = "quoted-string.pest"]
@@ -61,4 +62,28 @@ fn parse_quoted_string(s: String) -> std::result::Result<String, anyhow::Error> 
             .to_string()),
         Err(e) => Err(e).context("Failed to parse plugins from tmux config"),
     }
+}
+
+pub fn install_plugins() -> Result<()> {
+    let specs = load_specs()?;
+
+    let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
+
+    for spec in specs {
+        let plugin = Plugin::from(spec);
+        let url = plugin.url();
+        let name = plugin.name();
+
+        println!("\nInstalling {}", plugin);
+
+        run_cmd!(
+            cd /tmp;
+            rm -rf tmux-plugins;
+            mkdir -p tmux-plugins;
+            echo git clone $url $plugins_dir/$name;
+        )?;
+    }
+
+    println!("\nDone\n");
+    Ok(())
 }
