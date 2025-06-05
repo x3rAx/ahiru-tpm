@@ -1,7 +1,8 @@
-use anyhow::{Result, anyhow};
+use anyhow::{Context, Result, anyhow};
 use getset::Getters;
 use pest::Parser;
 use pest_derive::Parser;
+use url::Url;
 
 #[derive(Debug, Getters, PartialEq)]
 pub struct Spec {
@@ -9,7 +10,7 @@ pub struct Spec {
     name: String,
 
     #[getset(get = "pub")]
-    url: String,
+    url: Url,
 
     #[getset(get = "pub")]
     branch: Option<String>,
@@ -50,7 +51,7 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
     for pair in SpecParser::parse(Rule::spec, &value)? {
         match pair.as_rule() {
             Rule::short_url => {
-                url = Some(pair.as_str().to_string());
+                url = Some(build_url(pair.as_str())?);
                 name = pair
                     .into_inner()
                     .find(|x| x.as_rule() == Rule::repo)
@@ -68,6 +69,10 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
     })
 }
 
+fn build_url(value: &str) -> Result<Url> {
+    Url::parse(&format!("https://github.com/{value}.git")).context("Failed to parse GitHub url")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -77,7 +82,7 @@ mod tests {
         let value = "user_name/repo-name";
         let expected_spec = Spec {
             name: "repo-name".into(),
-            url: "user_name/repo-name".into(),
+            url: Url::parse("https://github.com/user_name/repo-name.git").unwrap(),
             branch: None,
         };
         assert_eq!(Spec::try_from(value).unwrap(), expected_spec);
@@ -88,7 +93,7 @@ mod tests {
         let value = "user_name/repo-name#branch/name";
         let expected_spec = Spec {
             name: "repo-name".into(),
-            url: "user_name/repo-name".into(),
+            url: Url::parse("https://github.com/user_name/repo-name.git").unwrap(),
             branch: Some("branch/name".into()),
         };
         assert_eq!(Spec::try_from(value).unwrap(), expected_spec);
