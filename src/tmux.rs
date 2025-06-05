@@ -13,6 +13,10 @@ pub fn get_config_path() -> Option<PathBuf> {
     get_config_dir().map(|p| p.join("tmux.conf"))
 }
 
+pub fn get_plugins_dir() -> Option<PathBuf> {
+    get_config_dir().map(|p| p.join("plugins"))
+}
+
 pub fn get_config_dir() -> Option<PathBuf> {
     // Try `$XDG_CONFIG_HOME` (with fallback to `$HOME/.config/`)
     let config_dir = xdir::config().map(|path| path.join("tmux"));
