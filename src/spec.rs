@@ -80,7 +80,7 @@ mod tests {
             url: "user_name/repo-name".into(),
             branch: None,
         };
-        assert_eq!(parse_spec(value).unwrap(), expected_spec);
+        assert_eq!(Spec::try_from(value).unwrap(), expected_spec);
     }
 
     #[test]
@@ -91,7 +91,7 @@ mod tests {
             url: "user_name/repo-name".into(),
             branch: Some("branch/name".into()),
         };
-        assert_eq!(parse_spec(value).unwrap(), expected_spec);
+        assert_eq!(Spec::try_from(value).unwrap(), expected_spec);
     }
 
     #[test]
