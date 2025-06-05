@@ -41,11 +41,17 @@ fn load_specs_from_config(config_path: &Path) -> Result<Vec<String>> {
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .map(|s| match QuotedParser::parse(Rule::quoted_string, &s) {
-            Ok(mut pairs) => Ok(
-                pairs.next()
-                    .expect("there should be one pair after parsing because parsing would have failed earlier")
-                    .as_str()
-                    .to_string()),
+            Ok(mut pairs) => Ok(pairs
+                .next()
+                .expect("The first pair should always exist")
+                .into_inner()
+                .next()
+                .expect("The single or double quoted string should always exist")
+                .into_inner()
+                .next()
+                .expect("The single or double inner should always exist")
+                .as_str()
+                .to_string()),
             Err(e) => Err(e).context("Failed to parse plugins from tmux config"),
         })
         .collect::<Result<_, _>>()

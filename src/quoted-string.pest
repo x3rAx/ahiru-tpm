@@ -1,7 +1,10 @@
 quoted_string = { single_quoted | double_quoted }
 
-single_quoted = { "'" ~ (!"'" ~ ANY)* ~ "'" }
-double_quoted = { "\"" ~ (escaped_char | normal_char)* ~ "\"" }
+single_quoted =  { "'" ~ single_inner ~ "'" }
+single_inner  = @{ (!"'" ~ ANY)* }
 
-escaped_char = { "\\" ~ "\"" }
-normal_char  = { !("\"") ~ ANY }
+double_quoted =  { "\"" ~ double_inner ~ "\"" }
+double_inner  = @{ (escaped_char | normal_char)* }
+
+escaped_char = { "\\" ~ ("\"" | "\\") }
+normal_char  = { !("\\" | "\"") ~ ANY }
