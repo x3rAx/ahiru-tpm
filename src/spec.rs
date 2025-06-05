@@ -93,4 +93,12 @@ mod tests {
         };
         assert_eq!(parse_spec(value).unwrap(), expected_spec);
     }
+
+    #[test]
+    fn test_should_error_on_empty_value() {
+        let value = "";
+        let result = Spec::try_from(value);
+        let err = result.unwrap_err();
+        assert_eq!(format!("{err}"), "Plugin spec must not be empty");
+    }
 }
