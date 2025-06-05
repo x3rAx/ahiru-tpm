@@ -56,12 +56,6 @@ fn parse_quoted_string(s: String) -> std::result::Result<String, anyhow::Error> 
     match QuotedParser::parse(Rule::quoted_string, &s) {
         Ok(mut pairs) => Ok(pairs
             .next()
-            .expect("The first pair should always exist")
-            .into_inner()
-            .next()
-            .expect("The single or double quoted string should always exist")
-            .into_inner()
-            .next()
             .expect("The single or double inner should always exist")
             .as_str()
             .to_string()),
