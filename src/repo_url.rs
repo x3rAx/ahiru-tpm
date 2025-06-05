@@ -11,9 +11,7 @@ impl Display for RepoUrl {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use RepoUrl::*;
 
-        let url = match self {
-            Short(url) => format!("https://github.com/{url}.git"),
-        };
+        let Short(url) = self;
 
         write!(f, "{url}")
     }

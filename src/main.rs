@@ -4,6 +4,7 @@ use tpm_rs::{
     plugins,
     tmux::{self, get_option},
 };
+use url::Url;
 
 fn main() -> Result<()> {
     let tpm_async = get_option("@tpm_async").unwrap_or("".into()) == "true";
@@ -22,7 +23,7 @@ fn main() -> Result<()> {
     let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
 
     for spec in specs {
-        let url = spec.url();
+        let url: Url = spec.url().into();
         let name = spec.name();
         println!("\nInstalling {}", spec.name());
 
