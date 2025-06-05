@@ -19,7 +19,7 @@ fn main() -> Result<()> {
 
     println!("\nPlugins dir: {:?}", tmux::get_plugins_dir());
 
-    let _plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
+    let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
 
     for spec in specs {
         let url = spec.url();
@@ -30,7 +30,7 @@ fn main() -> Result<()> {
             cd /tmp;
             rm -rf tmux-plugins;
             mkdir -p tmux-plugins;
-            git clone $url tmux-plugins/$name;
+            echo git clone $url $plugins_dir/$name;
         )?;
     }
 
