@@ -3,7 +3,7 @@ use getset::Getters;
 use pest::Parser;
 use pest_derive::Parser;
 
-#[derive(Debug, Getters)]
+#[derive(Debug, Getters, PartialEq)]
 pub struct Spec {
     #[getset(get = "pub")]
     name: String,
@@ -66,4 +66,31 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
         url: url.ok_or_else(|| anyhow!("Failed to get plugin url"))?,
         branch,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_short_url() {
+        let value = "user_name/repo-name";
+        let expected_spec = Spec {
+            name: "repo-name".into(),
+            url: "user_name/repo-name".into(),
+            branch: None,
+        };
+        assert_eq!(parse_spec(value).unwrap(), expected_spec);
+    }
+
+    #[test]
+    fn test_parse_short_url_with_branch() {
+        let value = "user_name/repo-name#branch/name";
+        let expected_spec = Spec {
+            name: "repo-name".into(),
+            url: "user_name/repo-name".into(),
+            branch: Some("branch/name".into()),
+        };
+        assert_eq!(parse_spec(value).unwrap(), expected_spec);
+    }
 }
