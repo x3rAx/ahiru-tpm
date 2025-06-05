@@ -1,8 +1,10 @@
 use anyhow::{Result, anyhow};
+use getset::Getters;
 
-#[derive(Debug)]
+#[derive(Debug, Getters)]
 pub struct Spec {
-    pub plugin: String,
+    #[getset(get = "pub")]
+    plugin: String,
 }
 
 impl TryFrom<String> for Spec {

@@ -10,7 +10,7 @@ fn main() -> Result<()> {
 
     println!("Plugins:");
     for spec in specs {
-        println!("  {}", spec.plugin);
+        println!("  {}", spec.plugin());
     }
 
     Ok(())
