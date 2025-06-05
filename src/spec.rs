@@ -19,10 +19,10 @@ pub struct Spec {
 #[grammar = "spec.pest"]
 struct SpecParser;
 
-impl TryFrom<String> for Spec {
+impl TryFrom<&str> for Spec {
     type Error = anyhow::Error;
 
-    fn try_from(value: String) -> Result<Self> {
+    fn try_from(value: &str) -> Result<Self> {
         if value.is_empty() {
             Err(anyhow!("Plugin spec must not be empty"))
         } else if value.contains(';') {
@@ -31,6 +31,14 @@ impl TryFrom<String> for Spec {
         } else {
             parse_spec(value)
         }
+    }
+}
+
+impl TryFrom<String> for Spec {
+    type Error = anyhow::Error;
+
+    fn try_from(value: String) -> Result<Self> {
+        Self::try_from(value.as_ref())
     }
 }
 
