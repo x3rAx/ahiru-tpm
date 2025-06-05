@@ -1,12 +1,13 @@
-use anyhow::{Result, anyhow};
-use tpm_rs::plugins::install_plugins;
+use anyhow::Result;
+use tpm_rs::{action::Action, plugins::install_plugins};
 
 fn main() -> Result<()> {
     // Get first argument
-    let action = std::env::args().nth(1).unwrap_or("install".into());
+    let action = Action::try_from(std::env::args().nth(1))?;
 
-    match action.as_ref() {
-        "install" => install_plugins(),
-        _ => Err(anyhow!("Unknown action: {action}")),
+    println!("{action:?}");
+
+    match action {
+        Action::Install => install_plugins(),
     }
 }
