@@ -29,31 +29,49 @@ impl TryFrom<String> for Spec {
             Err(anyhow!("Attributes are not supported yet")
                 .context(format!("Failed to parse: {value}")))
         } else {
-            let parsed = SpecParser::parse(Rule::spec, &value)?;
-
-            let mut name = None;
-            let mut url = None;
-            let mut branch = None;
-
-            for pair in parsed {
-                match pair.as_rule() {
-                    Rule::short_url => {
-                        url = Some(pair.as_str().to_string());
-                        name = pair
-                            .into_inner()
-                            .find(|x| x.as_rule() == Rule::repo)
-                            .map(|r| r.as_str().to_string());
-                    }
-                    Rule::branch => branch = Some(pair.as_str().to_string()),
-                    _ => (),
-                };
-            }
-
-            Ok(Spec {
-                name: name.ok_or_else(|| anyhow!("Failed to get plugin name"))?,
-                url: url.ok_or_else(|| anyhow!("Failed to get plugin url"))?,
-                branch,
-            })
+            parse_spec(&value)
         }
+    }
+}
+
+fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
+    let mut name = None;
+    let mut url = None;
+    let mut branch = None;
+
+    for pair in SpecParser::parse(Rule::spec, &value)? {
+        match pair.as_rule() {
+            Rule::short_url => {
+                url = Some(pair.as_str().to_string());
+                name = pair
+                    .into_inner()
+                    .find(|x| x.as_rule() == Rule::repo)
+                    .map(|r| r.as_str().to_string());
+            }
+            Rule::branch => branch = Some(pair.as_str().to_string()),
+            _ => (),
+        };
+    }
+
+    Ok(Spec {
+        name: name.ok_or_else(|| anyhow!("Failed to get plugin name"))?,
+        url: url.ok_or_else(|| anyhow!("Failed to get plugin url"))?,
+        branch,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_short_url() {
+        let value = "user_name/repo-name";
+        let expected_spec = Spec {
+            name: "repo-name".into(),
+            url: "user_name/repo-name".into(),
+            branch: None,
+        };
+        assert_eq!(parse_spec(value).unwrap(), expected_spec);
     }
 }
