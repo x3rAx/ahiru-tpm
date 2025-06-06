@@ -10,5 +10,6 @@ pub struct Args {
 #[derive(Subcommand, Debug)]
 pub enum Action {
     Install,
+    Update,
     Load,
 }

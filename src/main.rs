@@ -10,6 +10,7 @@ fn main() -> Result<()> {
 
     match args.action {
         Action::Install => plugins::install(),
+        Action::Update => plugins::update_all(),
         Action::Load => plugins::load(),
     }
 }

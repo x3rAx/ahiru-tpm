@@ -93,10 +93,9 @@ fn install_plugin(plugin: &Plugin) -> std::result::Result<(), anyhow::Error> {
     };
 
     run_cmd!(
-        cd /tmp;
         git clone --single-branch --recursive $[branch_args] $url $path;
     )
-    .context(format!("Failed to install plugin {}", plugin.name()))
+    .context(format!(r#"Failed to install plugin "{}""#, plugin.name()))
 }
 
 pub fn load() -> Result<()> {
@@ -119,7 +118,37 @@ fn load_plugin(plugin: &Plugin) -> Result<()> {
         let init_file = entry.to_str().context("Path is not valid UTF-8")?;
 
         // Run the init plugin file
-        run_cmd!($init_file).context("Failed to load plugin")?;
+        run_cmd!($init_file).context(format!(r#"Failed to load plugin "{}""#, plugin.name()))?;
     }
     Ok(())
+}
+
+pub fn update_all() -> Result<()> {
+    get_plugins()?
+        .into_iter()
+        .filter_map(|plugin| match plugin.is_installed() {
+            Ok(true) => Some(Ok(plugin)),
+            Ok(false) => None,
+            Err(e) => Some(Err(e)),
+        })
+        .collect::<Result<Vec<_>>>()?
+        .par_iter()
+        .map(update_plugin)
+        .collect::<Result<_>>()
+}
+
+fn update_plugin(plugin: &Plugin) -> Result<()> {
+    if !plugin.is_installed()? {
+        return Err(anyhow!(r#"Plugin "{}" is not installed"#, plugin.name()));
+    }
+
+    let path = plugin.path()?;
+
+    run_cmd!(
+        cd $path;
+        git pull;
+        git submodule update --init --recursive;
+
+    )
+    .context(format!(r#"Failed to update plugin "{}""#, plugin.name()))
 }
