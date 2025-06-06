@@ -15,6 +15,8 @@ pub enum Action {
     Update(UpdateArgs),
     /// Load plugins defined in tmux config
     Load,
+    /// Clean plugins not listed in tmux config
+    Clean,
 }
 
 #[derive(Parser, Debug)]

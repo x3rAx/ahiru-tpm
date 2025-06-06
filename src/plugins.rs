@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs::File,
     io::{BufRead, BufReader},
     path::Path,
@@ -167,4 +167,31 @@ fn update_plugin(plugin: &Plugin) -> Result<()> {
 
     )
     .context(format!(r#"Failed to update plugin "{}""#, plugin.name()))
+}
+
+pub fn clean() -> Result<()> {
+    let plugin_set: HashSet<_> = get_plugins()?
+        .into_iter()
+        .map(|plugin| {
+            Ok(plugin
+                .path()?
+                .to_str()
+                .context("Path is not valid UTF-8")?
+                .to_owned())
+        })
+        .collect::<Result<HashSet<_>>>()?;
+
+    let plugin_dir = tmux::get_plugins_dir().context("Failed to find tmux plugins dir")?;
+    let plugin_dir_str = plugin_dir.to_str().context("Path is not valid UTF-8")?;
+
+    for entry in glob(&format!("{plugin_dir_str}/*"))? {
+        let entry = entry?;
+        let path_str = entry.to_str().context("Path is not valid UTF-8")?;
+
+        if !plugin_set.contains(path_str) {
+            println!("Removing {path_str}");
+            run_cmd!(rm -rf $path_str)?
+        }
+    }
+    Ok(())
 }

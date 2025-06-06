@@ -13,5 +13,6 @@ fn main() -> Result<()> {
         Action::Update(UpdateArgs { all: true, .. }) => plugins::update_all(),
         Action::Update(UpdateArgs { all: false, names }) => plugins::update(&names),
         Action::Load => plugins::load(),
+        Action::Clean => plugins::clean(),
     }
 }
