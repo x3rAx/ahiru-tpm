@@ -1,16 +1,15 @@
 use anyhow::Result;
+use clap::Parser;
 use tpm_rs::{
     action::Action,
+    args::Args,
     plugins::{self},
 };
 
 fn main() -> Result<()> {
-    // Get first argument
-    let action = Action::try_from(std::env::args().nth(1))?;
+    let args = Args::parse();
 
-    println!("{action:?}");
-
-    match action {
+    match args.action {
         Action::Install => plugins::install(),
         Action::Load => plugins::load(),
     }
