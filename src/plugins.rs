@@ -64,13 +64,16 @@ fn parse_quoted_string(s: String) -> std::result::Result<String, anyhow::Error> 
     }
 }
 
+pub fn get_plugins() -> Result<Vec<Plugin>> {
+    Ok(load_specs()?.into_iter().map(Plugin::from).collect())
+}
+
 pub fn install_plugins() -> Result<()> {
-    let specs = load_specs()?;
+    let plugins = get_plugins()?;
 
     let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
 
-    for spec in specs {
-        let plugin = Plugin::from(spec);
+    for plugin in plugins {
         let url = plugin.url();
         let name = plugin.name();
 
