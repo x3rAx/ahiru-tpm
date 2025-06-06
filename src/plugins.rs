@@ -71,11 +71,9 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
 pub fn install() -> Result<()> {
     let plugins = get_plugins()?;
 
-    let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
-
     for plugin in plugins {
         let url = plugin.url();
-        let name = plugin.name();
+        let path = plugin.path().context("Failed to get tmux plugin path")?;
 
         if plugin
             .is_installed()
@@ -88,7 +86,7 @@ pub fn install() -> Result<()> {
 
         run_cmd!(
             cd /tmp;
-            git clone $url $plugins_dir/$name;
+            git clone $url $path;
         )?;
     }
 

@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, path::PathBuf, sync::OnceLock};
 
 use url::Url;
 
@@ -6,6 +6,7 @@ use crate::{spec::Spec, tmux};
 
 pub struct Plugin {
     spec: Spec,
+    path: OnceLock<Option<PathBuf>>,
 }
 
 impl Plugin {
@@ -18,13 +19,22 @@ impl Plugin {
     }
 
     pub fn is_installed(&self) -> Option<bool> {
-        tmux::get_plugins_dir().map(|p| p.join(self.name()).exists())
+        self.path().map(|p| p.exists())
+    }
+
+    pub fn path(&self) -> Option<&PathBuf> {
+        self.path
+            .get_or_init(|| tmux::get_plugins_dir().map(|p| p.join(self.name())))
+            .as_ref()
     }
 }
 
 impl From<Spec> for Plugin {
     fn from(spec: Spec) -> Self {
-        Plugin { spec }
+        Plugin {
+            spec,
+            path: OnceLock::new(),
+        }
     }
 }
 
