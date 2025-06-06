@@ -100,10 +100,7 @@ fn install_plugin(plugin: &Plugin) -> std::result::Result<(), anyhow::Error> {
 }
 
 pub fn load() -> Result<()> {
-    get_plugins()?
-        .par_iter()
-        .map(load_plugin)
-        .collect::<Result<_>>()
+    get_plugins()?.par_iter().try_for_each(load_plugin)
 }
 
 fn load_plugin(plugin: &Plugin) -> Result<()> {
@@ -134,8 +131,7 @@ pub fn update_all() -> Result<()> {
         })
         .collect::<Result<Vec<_>>>()?
         .par_iter()
-        .map(update_plugin)
-        .collect::<Result<_>>()
+        .try_for_each(update_plugin)
 }
 
 pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
