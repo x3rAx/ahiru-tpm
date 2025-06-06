@@ -1,5 +1,8 @@
 use anyhow::Result;
-use tpm_rs::{action::Action, plugins::install_plugins};
+use tpm_rs::{
+    action::Action,
+    plugins::{self},
+};
 
 fn main() -> Result<()> {
     // Get first argument
@@ -8,6 +11,6 @@ fn main() -> Result<()> {
     println!("{action:?}");
 
     match action {
-        Action::Install => install_plugins(),
+        Action::Install => plugins::install(),
     }
 }

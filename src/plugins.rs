@@ -68,7 +68,7 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
     Ok(load_specs()?.into_iter().map(Plugin::from).collect())
 }
 
-pub fn install_plugins() -> Result<()> {
+pub fn install() -> Result<()> {
     let plugins = get_plugins()?;
 
     let plugins_dir = tmux::get_plugins_dir().context("Failed to get tmux plugins dir")?;
