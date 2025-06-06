@@ -33,6 +33,10 @@ impl Plugin {
                 .join(self.name()))
         })
     }
+
+    pub fn branch(&self) -> Option<&str> {
+        self.spec.branch()
+    }
 }
 
 impl From<Spec> for Plugin {

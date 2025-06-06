@@ -85,9 +85,14 @@ pub fn install() -> Result<()> {
 
         println!("\nInstalling {}", plugin);
 
+        let branch_args = match plugin.branch() {
+            Some(branch) => vec!["--branch", branch],
+            None => vec![],
+        };
+
         run_cmd!(
             cd /tmp;
-            git clone $url $path;
+            git clone $[branch_args] $url $path;
         )?;
     }
 

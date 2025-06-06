@@ -13,8 +13,13 @@ pub struct Spec {
     #[getset(get = "pub")]
     url: RepoUrl,
 
-    #[getset(get = "pub")]
     branch: Option<String>,
+}
+
+impl Spec {
+    pub fn branch(&self) -> Option<&str> {
+        self.branch.as_deref()
+    }
 }
 
 #[derive(Parser)]
