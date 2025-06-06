@@ -92,7 +92,7 @@ pub fn install() -> Result<()> {
 
         run_cmd!(
             cd /tmp;
-            git clone $[branch_args] $url $path;
+            git clone --single-branch --recursive $[branch_args] $url $path;
         )?;
     }
 
