@@ -47,8 +47,9 @@ fn filter_and_get_raw_plugin_spec(
 ) -> Option<std::result::Result<String, std::io::Error>> {
     move |line| match line {
         Ok(l) => re
-            .captures(&l)
-            .and_then(|caps| caps.name("spec").map(|m| Ok(m.as_str().to_string()))),
+            .captures(&l)?
+            .name("spec")
+            .map(|m| Ok(m.as_str().to_string())),
         Err(e) => Some(Err(e)),
     }
 }
