@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     fs::File,
     io::{BufRead, BufReader},
     path::Path,
@@ -135,6 +136,25 @@ pub fn update_all() -> Result<()> {
         .par_iter()
         .map(update_plugin)
         .collect::<Result<_>>()
+}
+
+pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
+    let plugin_map: HashMap<_, _> = get_plugins()?
+        .into_iter()
+        .map(|plugin| (plugin.name().to_owned(), plugin))
+        .collect();
+
+    names
+        .iter()
+        .map(|name| {
+            let name = name.as_ref();
+            plugin_map
+                .get(name)
+                .context(format!("Unknown plugin name: {}", name))
+        })
+        .collect::<Result<Vec<_>>>()?
+        .par_iter()
+        .try_for_each(|plugin| update_plugin(plugin))
 }
 
 fn update_plugin(plugin: &Plugin) -> Result<()> {
