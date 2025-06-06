@@ -1,0 +1,11 @@
+[jobs.run-install]
+command = ["cargo", "run", "--", "install"]
+need_stdout = true
+allow_warnings = true
+background = true
+
+[jobs.run-load]
+command = ["cargo", "run", "--", "load"]
+need_stdout = true
+allow_warnings = true
+background = true

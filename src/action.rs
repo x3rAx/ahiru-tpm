@@ -1,11 +1,13 @@
 #[derive(Debug)]
 pub enum Action {
     Install,
+    Load,
 }
 
 fn parse_action(action: &str) -> Result<Action, anyhow::Error> {
     match action {
         "install" => Ok(Action::Install),
+        "load" => Ok(Action::Load),
         _ => Err(anyhow::anyhow!("Unknown action: {action}")),
     }
 }
@@ -32,7 +34,7 @@ impl TryFrom<Option<&str>> for Action {
     fn try_from(action: Option<&str>) -> Result<Self, Self::Error> {
         match action {
             Some(s) => parse_action(s),
-            None => Ok(Action::Install),
+            None => Ok(Action::Load),
         }
     }
 }

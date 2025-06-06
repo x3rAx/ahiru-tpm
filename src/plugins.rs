@@ -6,8 +6,11 @@ use std::{
 
 use anyhow::{Context, Result, anyhow};
 use cmd_lib::run_cmd;
+use glob::glob;
+use is_executable::IsExecutable;
 use pest::Parser;
 use pest_derive::Parser;
+use rayon::prelude::*;
 use regex::Regex;
 
 use crate::{plugin::Plugin, spec::Spec, tmux};
@@ -89,5 +92,30 @@ pub fn install() -> Result<()> {
     }
 
     println!("\nDone\n");
+    Ok(())
+}
+
+pub fn load() -> Result<()> {
+    get_plugins()?
+        .par_iter()
+        .map(load_plugin)
+        .collect::<Result<_>>()
+}
+
+fn load_plugin(plugin: &Plugin) -> Result<()> {
+    let path_str = plugin.path()?.to_str().context("Path is not valid UTF-8")?;
+
+    // Find all plugin init files (executable files ending in `.tmux`)
+    for entry in glob(&format!("{path_str}/*.tmux"))? {
+        let entry = entry?;
+        if !entry.is_file() || !entry.is_executable() {
+            continue;
+        }
+
+        let init_file = entry.to_str().context("Path is not valid UTF-8")?;
+
+        // Run the init plugin file
+        run_cmd!($init_file).context("Failed to load plugin")?;
+    }
     Ok(())
 }

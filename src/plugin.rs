@@ -1,7 +1,7 @@
 use std::{fmt::Display, path::PathBuf};
 
 use anyhow::{Context, Result};
-use once_cell::unsync::OnceCell;
+use once_cell::sync::OnceCell;
 use url::Url;
 
 use crate::{spec::Spec, tmux};

@@ -12,5 +12,6 @@ fn main() -> Result<()> {
 
     match action {
         Action::Install => plugins::install(),
+        Action::Load => plugins::load(),
     }
 }
