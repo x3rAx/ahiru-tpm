@@ -600,6 +600,7 @@ dependencies = [
  "cmd_lib",
  "getset",
  "itertools",
+ "once_cell",
  "pest",
  "pest_derive",
  "regex",

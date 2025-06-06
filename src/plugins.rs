@@ -74,12 +74,9 @@ pub fn install() -> Result<()> {
 
     for plugin in plugins {
         let url = plugin.url();
-        let path = plugin.path().context("Failed to get tmux plugin path")?;
+        let path = plugin.path()?;
 
-        if plugin
-            .is_installed()
-            .context("Failed to check if plugin is installed")?
-        {
+        if plugin.is_installed()? {
             continue;
         }
 

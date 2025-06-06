@@ -1,12 +1,16 @@
-use std::{fmt::Display, path::PathBuf, sync::OnceLock};
+use std::{fmt::Display, path::PathBuf};
 
+use anyhow::{Context, Result};
+use once_cell::unsync::OnceCell;
 use url::Url;
 
 use crate::{spec::Spec, tmux};
 
 pub struct Plugin {
     spec: Spec,
-    path: OnceLock<Option<PathBuf>>,
+    // TODO: Once `std::cell::OnceCell::get_or_try_init` is stable replace `once_cell` crate with
+    //       `std::cell`
+    path: OnceCell<PathBuf>,
 }
 
 impl Plugin {
@@ -18,14 +22,16 @@ impl Plugin {
         self.spec.name()
     }
 
-    pub fn is_installed(&self) -> Option<bool> {
-        self.path().map(|p| p.exists())
+    pub fn is_installed(&self) -> Result<bool> {
+        Ok(self.path()?.exists())
     }
 
-    pub fn path(&self) -> Option<&PathBuf> {
-        self.path
-            .get_or_init(|| tmux::get_plugins_dir().map(|p| p.join(self.name())))
-            .as_ref()
+    pub fn path(&self) -> Result<&PathBuf> {
+        self.path.get_or_try_init(|| {
+            Ok(tmux::get_plugins_dir()
+                .context("Failed to get tmux plugins dir")?
+                .join(self.name()))
+        })
     }
 }
 
@@ -33,7 +39,7 @@ impl From<Spec> for Plugin {
     fn from(spec: Spec) -> Self {
         Plugin {
             spec,
-            path: OnceLock::new(),
+            path: OnceCell::new(),
         }
     }
 }
