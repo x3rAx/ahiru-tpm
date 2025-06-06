@@ -73,31 +73,30 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
 }
 
 pub fn install() -> Result<()> {
-    let plugins = get_plugins()?;
+    get_plugins()?
+        .par_iter()
+        .map(install_plugin)
+        .collect::<Result<_>>()
+}
 
-    for plugin in plugins {
-        let url = plugin.url();
-        let path = plugin.path()?;
-
-        if plugin.is_installed()? {
-            continue;
-        }
-
-        println!("\nInstalling {}", plugin);
-
-        let branch_args = match plugin.branch() {
-            Some(branch) => vec!["--branch", branch],
-            None => vec![],
-        };
-
-        run_cmd!(
-            cd /tmp;
-            git clone --single-branch --recursive $[branch_args] $url $path;
-        )?;
+fn install_plugin(plugin: &Plugin) -> std::result::Result<(), anyhow::Error> {
+    if plugin.is_installed()? {
+        return Ok(());
     }
 
-    println!("\nDone\n");
-    Ok(())
+    let url = plugin.url();
+    let path = plugin.path()?;
+
+    let branch_args = match plugin.branch() {
+        Some(branch) => vec!["--branch", branch],
+        None => vec![],
+    };
+
+    run_cmd!(
+        cd /tmp;
+        git clone --single-branch --recursive $[branch_args] $url $path;
+    )
+    .context(format!("Failed to install plugin {}", plugin.name()))
 }
 
 pub fn load() -> Result<()> {
