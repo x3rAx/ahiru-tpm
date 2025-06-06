@@ -9,7 +9,10 @@ pub struct Args {
 
 #[derive(Subcommand, Debug)]
 pub enum Action {
+    /// Install plugins defined in tmux config
     Install,
+    /// Update installed plugins that are defined in tmux config
     Update,
+    /// Load plugins defined in tmux config
     Load,
 }
