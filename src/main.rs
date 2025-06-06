@@ -1,8 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
 use tpm_rs::{
-    action::Action,
-    args::Args,
+    args::{Action, Args},
     plugins::{self},
 };
 
