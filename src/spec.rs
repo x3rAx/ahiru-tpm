@@ -64,14 +64,21 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
                     .map(|r| r.as_str().to_string());
             }
             Rule::branch => branch = Some(pair.as_str().to_string()),
+            Rule::full_url => {
+                url = Some(RepoUrl::Full(pair.as_str().to_string()));
+                name = pair
+                    .into_inner()
+                    .find(|x| x.as_rule() == Rule::repo)
+                    .map(|r| r.as_str().to_string());
+            }
             Rule::EOI => break,
             Rule::spec | Rule::user | Rule::repo | Rule::ident => unreachable!(),
         };
     }
 
     Ok(Spec {
-        name: name.ok_or_else(|| anyhow!("Failed to get plugin name"))?,
-        url: url.ok_or_else(|| anyhow!("Failed to get plugin url"))?,
+        name: name.ok_or_else(|| anyhow!("Failed to get plugin name from spec"))?,
+        url: url.ok_or_else(|| anyhow!("Failed to get plugin url from spec"))?,
         branch,
     })
 }
