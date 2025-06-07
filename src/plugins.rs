@@ -9,6 +9,7 @@ use anyhow::{Context, Result, anyhow};
 use cmd_lib::run_cmd;
 use glob::glob;
 use is_executable::IsExecutable;
+use log::{info, warn};
 use pest::Parser;
 use pest_derive::Parser;
 use rayon::prelude::*;
@@ -110,6 +111,8 @@ pub fn load() -> Result<()> {
 }
 
 fn load_plugin(plugin: &Plugin) -> Result<()> {
+    info!("Loading plugin {}", plugin.name());
+
     let path_str = plugin.path()?.to_str().context("Path is not valid UTF-8")?;
 
     // Find all plugin init files (executable files ending in `.tmux`)
