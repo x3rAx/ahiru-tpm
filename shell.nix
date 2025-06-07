@@ -15,6 +15,8 @@ pkgs.mkShell {
     bacon # CLI test runner
     cargo-watch
 
+    cargo2nix
+
     #openssl.dev
     #pkgconfig # Required to find openssl
   ];
