@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use cmd_lib::run_fun;
 
 pub fn get_option(name: &str) -> Option<String> {
-    run_fun!(tmux show-option -vg $name).ok()
+    run_fun!(tmux show-option -vg $name 2>/dev/null).ok()
 }
 
 // TODO:
