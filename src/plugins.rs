@@ -28,6 +28,7 @@ pub fn load_specs() -> Result<Vec<Spec>> {
         .into_iter()
         .map(Spec::try_from)
         .collect::<Result<_, _>>()
+        .context("Plugin spec is not valid")
 }
 
 fn load_specs_from_config(config_path: &Path) -> Result<Vec<String>> {
