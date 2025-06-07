@@ -5,8 +5,11 @@ use tpm_rs::{
     plugins::{self},
 };
 
+#[cmd_lib::main]
 fn main() -> Result<()> {
     let args = Args::parse();
+
+    env_logger::init();
 
     match args.action {
         Action::Install => plugins::install(),
