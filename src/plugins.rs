@@ -75,10 +75,11 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
 }
 
 pub fn install() -> Result<()> {
-    get_plugins()?
-        .par_iter()
-        .map(install_plugin)
-        .collect::<Result<_>>()
+    if do_parallel() {
+        get_plugins()?.par_iter().try_for_each(install_plugin)
+    } else {
+        get_plugins()?.iter().try_for_each(install_plugin)
+    }
 }
 
 fn install_plugin(plugin: &Plugin) -> std::result::Result<(), anyhow::Error> {
@@ -101,7 +102,11 @@ fn install_plugin(plugin: &Plugin) -> std::result::Result<(), anyhow::Error> {
 }
 
 pub fn load() -> Result<()> {
-    get_plugins()?.par_iter().try_for_each(load_plugin)
+    if do_parallel() {
+        get_plugins()?.par_iter().try_for_each(load_plugin)
+    } else {
+        get_plugins()?.iter().try_for_each(load_plugin)
+    }
 }
 
 fn load_plugin(plugin: &Plugin) -> Result<()> {
@@ -123,16 +128,20 @@ fn load_plugin(plugin: &Plugin) -> Result<()> {
 }
 
 pub fn update_all() -> Result<()> {
-    get_plugins()?
+    let plugins = get_plugins()?
         .into_iter()
         .filter_map(|plugin| match plugin.is_installed() {
             Ok(true) => Some(Ok(plugin)),
             Ok(false) => None,
             Err(e) => Some(Err(e)),
         })
-        .collect::<Result<Vec<_>>>()?
-        .par_iter()
-        .try_for_each(update_plugin)
+        .collect::<Result<Vec<_>>>()?;
+
+    if do_parallel() {
+        plugins.par_iter().try_for_each(update_plugin)
+    } else {
+        plugins.iter().try_for_each(update_plugin)
+    }
 }
 
 pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
@@ -141,7 +150,7 @@ pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
         .map(|plugin| (plugin.name().to_owned(), plugin))
         .collect();
 
-    names
+    let plugins = names
         .iter()
         .map(|name| {
             let name = name.as_ref();
@@ -149,9 +158,15 @@ pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
                 .get(name)
                 .context(format!("Unknown plugin name: {}", name))
         })
-        .collect::<Result<Vec<_>>>()?
-        .par_iter()
-        .try_for_each(|plugin| update_plugin(plugin))
+        .collect::<Result<Vec<_>>>()?;
+
+    if do_parallel() {
+        plugins
+            .par_iter()
+            .try_for_each(|plugin| update_plugin(plugin))
+    } else {
+        plugins.iter().try_for_each(|plugin| update_plugin(plugin))
+    }
 }
 
 fn update_plugin(plugin: &Plugin) -> Result<()> {
@@ -195,4 +210,16 @@ pub fn clean() -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn do_parallel() -> bool {
+    match tmux::get_option("@tpm_parallel").as_deref() {
+        None => true,
+        Some("true") | Some("yes") => true,
+        Some("false") | Some("no") => false,
+        Some(val) => {
+            warn!(r#"Invalid value "{val}" for option `@tpm_parallel`. Falling back to "true""#);
+            true
+        }
+    }
 }
