@@ -17,6 +17,39 @@ Sutic](https://github.com/bruno-) for maintaining the list).
 
 ## Installation
 
+To let **tpm-rs** manage your tmux plugins, add the following at the end of
+your tmux config (either in `~/.tmux.conf` or
+`${XDG_CONFIG_HOME}/tmux/tmux.conf`):
+
+> [!Tip]
+>
+> If you want tmux to start up even faster, change the last line to
+>
+> ```tmux
+> tmux run -b 'tpm init'
+> ```
+>
+> The `-b` runs the init command in the background. This means that `tmux` will
+> not wait until `tpm` has initialized but it might cause a bit of flickering
+> until all plugins (e.g. themes) are loaded. 
+
+```tmux
+# List of plugins (install by running `tpm install`)
+    set -g @plugin 'tmux-plugins/tmux-sensible'
+    set -g @plugin 'x3rAx/tmux-yank#yank-action-mouse'
+    set -g @plugin 'catppuccin/tmux'
+
+    # Other examples:
+    # set -g @plugin 'github_username/plugin_name'
+    # set -g @plugin 'github_username/plugin_name#branch'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run 'tpm init'
+```
+
+Then proceed with one of the following install methods to get `tpm-rs`
+installed on your system:
+
 ### Nix Flakes
 
 > *Thanks to [Yazi](https://github.com/yazi-rs/) for the flake template below.*
