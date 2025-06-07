@@ -159,6 +159,53 @@ Or install it for the current user:
 cargo install --locked --path .
 ```
 
+## Usage
+
+### Installing Plugins
+
+Plugins can be installed by adding them to to the tmux config and running
+
+```sh
+tpm install
+```
+
+No need to reload tmux config first.
+
+To add a plugin, add the following line to your tmux config:
+
+```tmux
+set -g @plugin '<plugin-spec>'
+```
+
+Where `<plugin-spec>` is described below:
+
+#### Plugin Spec
+
+Currently plugins can only be installed from GitHub repositories. The
+following format is used for the `<plugin-spec>`:
+
+```tmux
+github_username/plugin_name
+github_username/plugin_name#branch
+```
+
+### Updating Plugins
+
+To update plugins run:
+
+```sh
+tpm update
+```
+
+### Uninstalling Plugins
+
+To uninstall plugins, first remove them from your tmux config. Then, to clean
+up downloaded plugins, run:
+
+```sh
+tpm clean
+```
+
 ## License
 
 [GNU GPLv3](./LICENSE)
