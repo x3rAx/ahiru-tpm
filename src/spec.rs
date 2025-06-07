@@ -64,7 +64,8 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
                     .map(|r| r.as_str().to_string());
             }
             Rule::branch => branch = Some(pair.as_str().to_string()),
-            _ => (),
+            Rule::EOI => break,
+            Rule::spec | Rule::user | Rule::repo | Rule::ident => unreachable!(),
         };
     }
 
