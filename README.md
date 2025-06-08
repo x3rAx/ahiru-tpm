@@ -5,7 +5,7 @@
 
 # Tmux Plugin Manager RS :crab:
 
-<small>*A drop-in replacement for the famous [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm), written in Rust.*</small>
+<small>_A drop-in replacement for the famous [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm), written in Rust._</small>
 
 **tpm-rs** installs, loads and manages **tmux** plugins.
 
@@ -31,7 +31,7 @@ your tmux config (either in `~/.tmux.conf` or
 >
 > The `-b` runs the init command in the background. This means that `tmux` will
 > not wait until `tpm` has initialized but it might cause a bit of flickering
-> until all plugins (e.g. themes) are loaded. 
+> until all plugins (e.g. themes) are loaded.
 
 ```tmux
 # List of plugins (install by running `tpm install`)
@@ -52,7 +52,7 @@ installed on your system:
 
 ### Nix Flakes
 
-> *Thanks to [Yazi](https://github.com/yazi-rs/) for the flake template below.*
+> _Thanks to [Yazi](https://github.com/yazi-rs/) for the flake template below._
 
 Below is a basic `flake.nix` showcasing how to add `tpm-rs` to system packages
 and through home-manager:
