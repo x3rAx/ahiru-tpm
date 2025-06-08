@@ -88,13 +88,13 @@ pub fn install() -> Result<()> {
     }
 }
 
-fn install_plugin(plugin: &Plugin) -> std::result::Result<(), anyhow::Error> {
-    if plugin.is_installed()? {
+fn install_plugin(plugin: &Plugin) -> Result<()> {
+    if plugin.is_installed() {
         return Ok(());
     }
 
     let url = plugin.url();
-    let path = plugin.path()?;
+    let path = plugin.path();
 
     let branch_args = match plugin.branch() {
         Some(branch) => vec!["--branch", branch],
@@ -118,7 +118,7 @@ pub fn load() -> Result<()> {
 fn load_plugin(plugin: &Plugin) -> Result<()> {
     info!("Loading plugin {}", plugin.name());
 
-    let path_str = plugin.path()?.to_str().context("Path is not valid UTF-8")?;
+    let path_str = plugin.path().to_str().context("Path is not valid UTF-8")?;
 
     // Find all plugin init files (executable files ending in `.tmux`)
     for entry in glob(&format!("{path_str}/*.tmux"))? {
@@ -136,14 +136,10 @@ fn load_plugin(plugin: &Plugin) -> Result<()> {
 }
 
 pub fn update_all() -> Result<()> {
-    let plugins = get_plugins()?
+    let plugins: Vec<Plugin> = get_plugins()?
         .into_iter()
-        .filter_map(|plugin| match plugin.is_installed() {
-            Ok(true) => Some(Ok(plugin)),
-            Ok(false) => None,
-            Err(e) => Some(Err(e)),
-        })
-        .collect::<Result<Vec<_>>>()?;
+        .filter(|plugin| plugin.is_installed())
+        .collect();
 
     if do_parallel() {
         plugins.par_iter().try_for_each(update_plugin)
@@ -178,11 +174,11 @@ pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
 }
 
 fn update_plugin(plugin: &Plugin) -> Result<()> {
-    if !plugin.is_installed()? {
+    if !plugin.is_installed() {
         return Err(anyhow!(r#"Plugin "{}" is not installed"#, plugin.name()));
     }
 
-    let path = plugin.path()?;
+    let path = plugin.path();
 
     run_cmd!(
         cd $path;
@@ -198,14 +194,14 @@ pub fn clean() -> Result<()> {
         .into_iter()
         .map(|plugin| {
             Ok(plugin
-                .path()?
+                .path()
                 .to_str()
                 .context("Path is not valid UTF-8")?
                 .to_owned())
         })
         .collect::<Result<HashSet<_>>>()?;
 
-    let plugin_dir = tmux::get_plugins_dir().context("Failed to find tmux plugins dir")?;
+    let plugin_dir = tmux::get_plugins_dir();
     let plugin_dir_str = plugin_dir.to_str().context("Path is not valid UTF-8")?;
 
     for entry in glob(&format!("{plugin_dir_str}/*"))? {
