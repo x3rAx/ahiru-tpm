@@ -32,7 +32,7 @@ pub fn load_specs() -> Result<Vec<Spec>> {
         return Err(anyhow!("Failed to find any tmux config files"));
     };
 
-    tmux::get_existing_config_paths()
+    configs
         .into_iter()
         .map(|p| load_specs_from_config(&p).context("Failed to load specs from config file"))
         .collect::<Result<Vec<_>>>()?
