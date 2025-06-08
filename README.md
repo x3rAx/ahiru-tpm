@@ -206,6 +206,20 @@ up downloaded plugins, run:
 tpm clean
 ```
 
+### Settings
+
+#### Disable Parallel Mode
+
+Sometimes you might want to disable parallel mode, for example to debug a
+problem with a plugin or if parallel loading leads to problems for whatever
+reason.
+
+This can be done by setting the following in the tmux config:
+
+```tmux
+set -g @tpm_parallel 'false'
+```
+
 ## License
 
 [MIT](./LICENSE)
