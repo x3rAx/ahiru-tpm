@@ -26,24 +26,22 @@ pub fn load_specs() -> Result<Vec<Spec>> {
         tmux::get_config_path().ok_or_else(|| anyhow!("Failed to find tmux config file"))?;
 
     load_specs_from_config(&config_path)?
-        .into_iter()
-        .map(Spec::try_from)
+        .map(|s| Spec::try_from(s?))
         .collect::<Result<_, _>>()
         .context("Plugin spec is not valid")
 }
 
-fn load_specs_from_config(config_path: &Path) -> Result<Vec<String>> {
+fn load_specs_from_config(
+    config_path: &Path,
+) -> Result<impl Iterator<Item = Result<String>> + use<>> {
     let file = File::open(config_path)?;
     let reader = BufReader::new(file);
     let re = Regex::new(r#"^\s*set(-option)?\s+-g\s+@plugin\s+(?P<spec>.*)"#)?;
 
-    reader
+    Ok(reader
         .lines()
         .filter_map(filter_and_get_raw_plugin_spec(re))
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .map(parse_quoted_string)
-        .collect::<Result<_, _>>()
+        .map(|s| parse_quoted_string(s?)))
 }
 
 fn filter_and_get_raw_plugin_spec(
