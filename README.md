@@ -220,6 +220,18 @@ This can be done by setting the following in the tmux config:
 set -g @tpm_parallel 'false'
 ```
 
+### Key Bindings
+
+The key bindings are currently hard coded. Although the default keybindings
+from the original TPM work here as well, it is discouraged and we recommend to
+use the more mnemonic key bindings:
+
+| Key bindings         | Description         |
+| -------------------- | ------------------- |
+| `prefix` + `alt + I` | **I**nstall plugins |
+| `prefix` + `alt + U` | **U**pdate plugins  |
+| `prefix` + `alt + C` | **C**lean plugins   |
+
 ## License
 
 [MIT](./LICENSE)
