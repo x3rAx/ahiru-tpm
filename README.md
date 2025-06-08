@@ -15,6 +15,23 @@ A curated list of plugins can be found
 [here](https://github.com/tmux-plugins/list) (thanks to [Bruno
 Sutic](https://github.com/bruno-) for maintaining the list).
 
+<!-- toc -->
+
+- [Installation](#installation)
+    * [Nix Flakes](#nix-flakes)
+    * [Build from source](#build-from-source)
+- [Usage](#usage)
+    * [Installing Plugins](#installing-plugins)
+        + [Plugin Spec](#plugin-spec)
+    * [Updating Plugins](#updating-plugins)
+    * [Uninstalling Plugins](#uninstalling-plugins)
+    * [Settings](#settings)
+        + [Disable Parallel Mode](#disable-parallel-mode)
+    * [Key Bindings](#key-bindings)
+- [License](#license)
+
+<!-- tocstop -->
+
 ## Installation
 
 To let **tpm-rs** manage your tmux plugins, add the following at the end of
