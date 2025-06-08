@@ -18,24 +18,25 @@ pub fn get_plugins_dir() -> Option<PathBuf> {
 }
 
 pub fn get_config_dir() -> Option<PathBuf> {
+    Some(get_user_config_path()?.parent()?.to_owned())
+}
+
+fn get_user_config_path() -> Option<PathBuf> {
     // Try `$XDG_CONFIG_HOME` (with fallback to `$HOME/.config/`)
-    let config_dir = xdir::config().map(|path| path.join("tmux"));
-    if has_tmux_config(&config_dir) {
-        return config_dir;
+    let config_path = xdir::config().map(|path| path.join("tmux/tmux.conf"));
+    if let Some(path) = config_path {
+        if path.exists() {
+            return Some(path);
+        }
     }
 
     // Try `$HOME/.tmux`
-    let config_dir = xdir::home().map(|path| path.join(".tmux"));
-    if has_tmux_config(&config_dir) {
-        return config_dir;
+    let config_path = xdir::home().map(|path| path.join(".tmux.conf"));
+    if let Some(path) = config_path {
+        if path.exists() {
+            return Some(path);
+        }
     }
 
     None
-}
-
-fn has_tmux_config(config_dir: &Option<PathBuf>) -> bool {
-    if let Some(config_path) = config_dir.as_ref().map(|p| p.join("tmux.conf")) {
-        return config_path.exists();
-    }
-    false
 }
