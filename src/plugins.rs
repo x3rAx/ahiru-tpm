@@ -202,7 +202,7 @@ fn update_plugin(plugin: &Plugin) -> Result<()> {
 
     run_cmd!(
         cd $path;
-        git pull;
+        git pull --rebase;
         git submodule update --init --recursive;
 
     )
