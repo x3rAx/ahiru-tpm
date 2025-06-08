@@ -22,14 +22,20 @@ use crate::{plugin::Plugin, spec::Spec, tmux};
 struct QuotedParser;
 
 pub fn load_specs() -> Result<Vec<Spec>> {
-    let Some(config_path) = tmux::get_config_path() else {
-        return Err(anyhow!("Failed to find tmux config file"));
+    let configs = tmux::get_existing_config_paths();
+
+    if configs.is_empty() {
+        return Err(anyhow!("Failed to find any tmux config files"));
     };
 
-    load_specs_from_config(&config_path)?
+    tmux::get_existing_config_paths()
+        .into_iter()
+        .map(|p| load_specs_from_config(&p).context("Failed to load specs from config file"))
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
+        .flatten()
         .map(|s| Spec::try_from(s?))
-        .collect::<Result<_, _>>()
-        .context("Plugin spec is not valid")
+        .collect::<Result<Vec<_>>>()
 }
 
 fn load_specs_from_config(

@@ -6,11 +6,20 @@ pub fn get_option(name: &str) -> Option<String> {
     run_fun!(tmux show-option -vg $name 2>/dev/null).ok()
 }
 
-// TODO:
-//   - Also load from `/etc/tmux.conf`
-//   - Get sourced files from tmux and also load from them
-pub fn get_config_path() -> Option<PathBuf> {
-    get_config_dir().map(|p| p.join("tmux.conf"))
+pub fn get_existing_config_paths() -> Vec<PathBuf> {
+    let mut configs = vec![];
+
+    let system_config = PathBuf::from("/etc/tmux.conf");
+    if system_config.exists() {
+        configs.push(system_config);
+    }
+
+    let user_config = get_user_config_path();
+    if let Some(path) = user_config {
+        configs.push(path);
+    }
+
+    configs
 }
 
 pub fn get_plugins_dir() -> Option<PathBuf> {
