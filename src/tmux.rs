@@ -23,7 +23,7 @@ pub fn get_existing_config_paths() -> Vec<PathBuf> {
 }
 
 pub fn get_plugins_dir() -> Option<PathBuf> {
-    get_config_dir().map(|p| p.join("plugins"))
+    xdir::data().map(|p| p.join("tmux/plugins"))
 }
 
 pub fn get_config_dir() -> Option<PathBuf> {
