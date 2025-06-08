@@ -1,3 +1,9 @@
+[jobs.auto-install]
+command = ["cargo", "install", "--path", ".", "--locked"]
+need_stdout = true
+allow_warnings = true
+background = true
+
 [jobs.run-install]
 command = ["cargo", "run", "--", "install"]
 need_stdout = true
