@@ -42,7 +42,7 @@ pub fn ensure_plugins_dir_exists() -> Result<PathBuf> {
     let path = get_plugins_dir();
 
     if !path.exists() {
-        fs::create_dir(&path)?;
+        fs::create_dir_all(&path)?;
     }
 
     if !path.is_dir() {
