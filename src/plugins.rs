@@ -15,7 +15,11 @@ use pest_derive::Parser;
 use rayon::prelude::*;
 use regex::Regex;
 
-use crate::{plugin::Plugin, spec::Spec, tmux};
+use crate::{
+    plugin::Plugin,
+    spec::Spec,
+    tmux::{self, ensure_plugins_dir_exists},
+};
 
 #[derive(Parser)]
 #[grammar = "quoted-string.pest"]
@@ -92,6 +96,8 @@ fn install_plugin(plugin: &Plugin) -> Result<()> {
     if plugin.is_installed() {
         return Ok(());
     }
+
+    ensure_plugins_dir_exists()?;
 
     let url = plugin.url();
     let path = plugin.path();

@@ -1,5 +1,6 @@
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
+use anyhow::{Result, anyhow};
 use cmd_lib::run_fun;
 
 pub fn get_option(name: &str) -> Option<String> {
@@ -35,6 +36,19 @@ pub fn get_plugins_dir() -> PathBuf {
         .join("tmux/plugins")
 }
 
+pub fn ensure_plugins_dir_exists() -> Result<PathBuf> {
+    let path = get_plugins_dir();
+
+    if !path.exists() {
+        fs::create_dir(&path)?;
+    }
+
+    if !path.is_dir() {
+        return Err(anyhow!("Not a directory: {}", path.to_string_lossy()));
+    }
+
+    Ok(path)
+}
 
 pub fn get_config_dir() -> PathBuf {
     get_user_config_path()
