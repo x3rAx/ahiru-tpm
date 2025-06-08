@@ -22,8 +22,9 @@ use crate::{plugin::Plugin, spec::Spec, tmux};
 struct QuotedParser;
 
 pub fn load_specs() -> Result<Vec<Spec>> {
-    let config_path =
-        tmux::get_config_path().ok_or_else(|| anyhow!("Failed to find tmux config file"))?;
+    let Some(config_path) = tmux::get_config_path() else {
+        return Err(anyhow!("Failed to find tmux config file"));
+    };
 
     load_specs_from_config(&config_path)?
         .map(|s| Spec::try_from(s?))
