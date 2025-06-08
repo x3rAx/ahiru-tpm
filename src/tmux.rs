@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 
-use anyhow::{Result, anyhow};
-use cmd_lib::run_fun;
+use anyhow::{Context, Result, anyhow};
+use cmd_lib::{run_cmd, run_fun};
 
 pub fn get_option(name: &str) -> Option<String> {
     run_fun!(tmux show-option -vg $name 2>/dev/null).ok()
@@ -50,4 +50,39 @@ pub fn ensure_plugins_dir_exists() -> Result<PathBuf> {
     }
 
     Ok(path)
+}
+
+pub fn setup_keymaps() -> Result<()> {
+    // TPM Compatibility
+    run_cmd!(
+        tmux bind-key "I" display-popup r"\
+            echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+I> instead   /!\';
+            echo ''
+            RUST_LOG=info tpm install
+            echo $'\n--- Done. Press ESC to close this popup. ---'
+        ";
+
+        tmux bind-key "U" display-popup r"
+            echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+I> instead   /!\';
+            echo ''
+            RUST_LOG=info tpm update
+            echo $'\n--- Done. Press ESC to close this popup. ---'
+        ";
+
+        tmux bind-key "M-u" display-popup r"
+            echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+C> instead   /!\';
+            echo ''
+            RUST_LOG=info tpm clean
+            echo $'\n--- Done. Press ESC to close this popup. ---'
+        ";
+    )
+    .context("Failed to setup keymaps for TPM compatibility")?;
+
+    // TPM-RS sensible keymaps
+    run_cmd!(
+        tmux bind-key "M-I" display-popup r"RUST_LOG=info tpm install; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key "M-U" display-popup r"RUST_LOG=info tpm update; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key "M-C" display-popup r"RUST_LOG=info tpm clean; echo $'\n--- Done. Press ESC to close this popup. ---'";
+    )
+    .context("Failed to setup keymaps")
 }

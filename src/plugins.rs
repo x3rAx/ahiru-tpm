@@ -114,6 +114,8 @@ fn install_plugin(plugin: &Plugin) -> Result<()> {
 }
 
 pub fn load() -> Result<()> {
+    tmux::setup_keymaps()?;
+
     if do_parallel() {
         get_plugins()?.par_iter().try_for_each(load_plugin)
     } else {
