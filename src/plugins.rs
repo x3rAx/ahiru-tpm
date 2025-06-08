@@ -89,7 +89,13 @@ pub fn install() -> Result<()> {
         get_plugins()?.par_iter().try_for_each(install_plugin)
     } else {
         get_plugins()?.iter().try_for_each(install_plugin)
-    }
+    }?;
+
+    load()?;
+
+    println!("==> Done installing plugins.");
+    println!("==> Plugins have been reloaded.");
+    Ok(())
 }
 
 fn install_plugin(plugin: &Plugin) -> Result<()> {
@@ -153,7 +159,13 @@ pub fn update_all() -> Result<()> {
         plugins.par_iter().try_for_each(update_plugin)
     } else {
         plugins.iter().try_for_each(update_plugin)
-    }
+    }?;
+
+    load()?;
+
+    println!("==> Done updating plugins.");
+    println!("==> Plugins have been reloaded.");
+    Ok(())
 }
 
 pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
