@@ -9,7 +9,9 @@ use tpm_rs::{
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    env_logger::init();
+    env_logger::builder()
+        .filter_level(log::LevelFilter::Info)
+        .init();
 
     match args.action {
         Action::Install => plugins::install(),
