@@ -1,6 +1,5 @@
 use std::{fmt::Display, path::PathBuf};
 
-use anyhow::{Context, Result};
 use once_cell::sync::OnceCell;
 use url::Url;
 
@@ -22,16 +21,13 @@ impl Plugin {
         self.spec.name()
     }
 
-    pub fn is_installed(&self) -> Result<bool> {
-        Ok(self.path()?.exists())
+    pub fn is_installed(&self) -> bool {
+        self.path().exists()
     }
 
-    pub fn path(&self) -> Result<&PathBuf> {
-        self.path.get_or_try_init(|| {
-            Ok(tmux::get_plugins_dir()
-                .context("Failed to get tmux plugins dir")?
-                .join(self.name()))
-        })
+    pub fn path(&self) -> &PathBuf {
+        self.path
+            .get_or_init(|| tmux::get_plugins_dir().join(self.name()))
     }
 
     pub fn branch(&self) -> Option<&str> {

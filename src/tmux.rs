@@ -15,37 +15,49 @@ pub fn get_existing_config_paths() -> Vec<PathBuf> {
     }
 
     let user_config = get_user_config_path();
-    if let Some(path) = user_config {
-        configs.push(path);
+    if user_config.exists() {
+        configs.push(user_config);
+    }
+
+    let home_config = xdir::home()
+        .expect("$HOME should be set")
+        .join(".tmux.conf");
+    if home_config.exists() {
+        configs.push(home_config);
     }
 
     configs
 }
 
-pub fn get_plugins_dir() -> Option<PathBuf> {
-    xdir::data().map(|p| p.join("tmux/plugins"))
+pub fn get_plugins_dir() -> PathBuf {
+    xdir::data()
+        .expect("XDG paths should be possible to build")
+        .join("tmux/plugins")
 }
 
-pub fn get_config_dir() -> Option<PathBuf> {
-    Some(get_user_config_path()?.parent()?.to_owned())
+
+pub fn get_config_dir() -> PathBuf {
+    get_user_config_path()
+        .parent()
+        .expect("User config is a file and should therefore have a parent")
+        .to_owned()
 }
 
-fn get_user_config_path() -> Option<PathBuf> {
+fn get_user_config_path() -> PathBuf {
     // Try `$XDG_CONFIG_HOME` (with fallback to `$HOME/.config/`)
-    let config_path = xdir::config().map(|path| path.join("tmux/tmux.conf"));
-    if let Some(path) = config_path {
-        if path.exists() {
-            return Some(path);
-        }
+    let config_path_xdg = xdir::config()
+        .expect("XDG paths should be possible to build")
+        .join("tmux/tmux.conf");
+    if config_path_xdg.exists() {
+        return config_path_xdg;
     }
 
     // Try `$HOME/.tmux`
-    let config_path = xdir::home().map(|path| path.join(".tmux.conf"));
-    if let Some(path) = config_path {
-        if path.exists() {
-            return Some(path);
-        }
+    let config_path = xdir::home().expect("XDG paths should be possible to build");
+    if config_path.exists() {
+        return config_path;
     }
 
-    None
+    // Use `$XDG_CONFIG_HOME` as fallback
+    config_path_xdg
 }
