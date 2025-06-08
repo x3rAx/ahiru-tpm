@@ -243,11 +243,11 @@ The key bindings are currently hard coded. Although the default keybindings
 from the original TPM work here as well, it is discouraged and we recommend to
 use the more mnemonic key bindings:
 
-| Key bindings         | Description         |
-| -------------------- | ------------------- |
-| `prefix` + `alt + I` | **I**nstall plugins |
-| `prefix` + `alt + U` | **U**pdate plugins  |
-| `prefix` + `alt + C` | **C**lean plugins   |
+| Key bindings         | Description                    |
+| -------------------- | ------------------------------ |
+| `prefix` + `alt + I` | **I**nstall and reload plugins |
+| `prefix` + `alt + U` | **U**pdate and reload plugins  |
+| `prefix` + `alt + C` | **C**lean plugins              |
 
 ## License
 
