@@ -1,29 +1,19 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fs::File,
-    io::{BufRead, BufReader},
-    path::Path,
-};
+use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, Result, anyhow};
 use cmd_lib::run_cmd;
 use glob::glob;
 use is_executable::IsExecutable;
+use itertools::Itertools;
 use log::{info, warn};
-use pest::Parser;
-use pest_derive::Parser;
 use rayon::prelude::*;
-use regex::Regex;
 
 use crate::{
     plugin::Plugin,
     spec::Spec,
     tmux::{self, ensure_plugins_dir_exists},
+    tmux_config_parser::{self, ConfigDirective},
 };
-
-#[derive(Parser)]
-#[grammar = "quoted-string.pest"]
-struct QuotedParser;
 
 pub fn load_specs() -> Result<Vec<Spec>> {
     let configs = tmux::get_existing_config_paths();
@@ -34,50 +24,18 @@ pub fn load_specs() -> Result<Vec<Spec>> {
 
     configs
         .into_iter()
-        .map(|p| load_specs_from_config(&p).context("Failed to load specs from config file"))
-        .collect::<Result<Vec<_>>>()?
-        .into_iter()
-        .flatten()
-        .map(|s| Spec::try_from(s?))
-        .collect::<Result<Vec<_>>>()
-}
-
-fn load_specs_from_config(
-    config_path: &Path,
-) -> Result<impl Iterator<Item = Result<String>> + use<>> {
-    let file = File::open(config_path)?;
-    let reader = BufReader::new(file);
-    let re = Regex::new(r#"^\s*set(-option)?\s+-g\s+@plugin\s+(?P<spec>.*)"#)?;
-
-    Ok(reader
-        .lines()
-        .filter_map(filter_and_get_raw_plugin_spec(re))
-        .map(|s| parse_quoted_string(s?)))
-}
-
-fn filter_and_get_raw_plugin_spec(
-    re: Regex,
-) -> impl FnMut(
-    std::result::Result<String, std::io::Error>,
-) -> Option<std::result::Result<String, std::io::Error>> {
-    move |line| match line {
-        Ok(l) => re
-            .captures(&l)?
-            .name("spec")
-            .map(|m| Ok(m.as_str().to_string())),
-        Err(e) => Some(Err(e)),
-    }
-}
-
-fn parse_quoted_string(s: String) -> std::result::Result<String, anyhow::Error> {
-    match QuotedParser::parse(Rule::quoted_string, &s) {
-        Ok(mut pairs) => Ok(pairs
-            .next()
-            .expect("The single or double inner should always exist")
-            .as_str()
-            .to_string()),
-        Err(e) => Err(e).context("Failed to parse plugins from tmux config"),
-    }
+        .map(|p| {
+            println!("1");
+            tmux_config_parser::parse(&p).context(format!(
+                "Failed to load specs from config file: {}",
+                p.display()
+            ))
+        })
+        .flatten_ok()
+        .map_ok(|d| match d {
+            ConfigDirective::PluginSpec(spec) => spec,
+        })
+        .collect::<Result<_>>()
 }
 
 pub fn get_plugins() -> Result<Vec<Plugin>> {
