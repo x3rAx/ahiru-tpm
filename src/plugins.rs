@@ -1,4 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
 use anyhow::{Context, Result, anyhow};
 use cmd_lib::run_cmd;
@@ -25,17 +28,30 @@ pub fn load_specs() -> Result<Vec<Spec>> {
     configs
         .into_iter()
         .map(|p| {
-            println!("1");
-            tmux_config_parser::parse(&p).context(format!(
+            get_specs_from_config(&p).context(format!(
                 "Failed to load specs from config file: {}",
                 p.display()
             ))
         })
         .flatten_ok()
-        .map_ok(|d| match d {
-            ConfigDirective::PluginSpec(spec) => spec,
+        .collect::<Result<Vec<_>>>()
+}
+
+fn get_specs_from_config(path: &Path) -> Result<Vec<Spec>> {
+    let it = tmux_config_parser::parse(path)
+        .context(format!(
+            "Failed to load specs from config file: {}",
+            path.display()
+        ))?
+        .into_iter()
+        .map(|directive| match directive {
+            ConfigDirective::PluginSpec(spec) => Ok(vec![spec]),
+            ConfigDirective::Source(path) => get_specs_from_config(path.as_ref()),
         })
-        .collect::<Result<_>>()
+        .flatten_ok()
+        .collect::<Result<Vec<_>>>()?;
+
+    Ok(it)
 }
 
 pub fn get_plugins() -> Result<Vec<Plugin>> {

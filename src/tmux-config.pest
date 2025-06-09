@@ -2,15 +2,18 @@ WHITESPACE = _{ " " | "\t" }
 COMMENT    = _{ "#" ~ (!newline ~ ANY)* }
 
 config    = _{ SOI ~ (directive+ | newline)* ~ EOI }
-directive = _{ ((plugin_spec | other) ~ (newline | EOI)) }
+directive = _{ ((plugin_spec | source | other) ~ (newline | EOI)) }
 
 newline = _{ "\r" | "\n" }
 
-plugin_spec = { set_option ~ "-g" ~ "@plugin" ~ quoted_string }
-// source      =  { source_file ~ source_file_flags ~ quoted_string }
-other = _{ (!newline ~ ANY)+ }
+plugin_spec =  { set_option ~ "-g" ~ "@plugin" ~ quoted_string }
+source      =  { source_file ~ source_file_flags ~ quoted_string }
+other       = @{ ("\\" ~ newline | !newline ~ ANY)+ }
 
-set_option = @{ "set" ~ ("-option")? }
+set_option  = @{ "set" ~ ("-option")? }
+source_file = @{ "source" ~ ("-file")? }
+
+source_file_flags = @{ ("-" ~ (ASCII_ALPHANUMERIC+) ~ WHITESPACE)* }
 
 // 
 // --- Quoted String ----------------------------------------------------------

@@ -1,0 +1,7 @@
+source_path = _{
+    SOI ~ (root_dir | config_dir)? ~ path ~ EOI
+}
+
+root_dir   = { "/" }
+config_dir = { "#{d:current_file}" }
+path       = { ANY+ }

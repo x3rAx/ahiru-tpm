@@ -86,3 +86,11 @@ pub fn setup_keymaps() -> Result<()> {
     )
     .context("Failed to setup keymaps")
 }
+
+/// Get the CWD in which tmux was initially started
+pub fn get_start_path() -> Result<PathBuf> {
+    Ok(PathBuf::from(
+        run_fun!(tmux display -pt 0 -F "#{pane_start_path}")
+            .context("Failed to get tmux start path")?,
+    ))
+}
