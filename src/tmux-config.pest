@@ -1,0 +1,27 @@
+WHITESPACE = _{ " " | "\t" }
+COMMENT    = _{ "#" ~ (!newline ~ ANY)* }
+
+config    = _{ SOI ~ (directive+ | newline)* ~ EOI }
+directive = _{ ((plugin_spec | other) ~ (newline | EOI)) }
+
+newline = _{ "\r" | "\n" }
+
+plugin_spec = { set_option ~ "-g" ~ "@plugin" ~ quoted_string }
+// source      =  { source_file ~ source_file_flags ~ quoted_string }
+other = _{ (!newline ~ ANY)+ }
+
+set_option = @{ "set" ~ ("-option")? }
+
+// 
+// --- Quoted String ----------------------------------------------------------
+// 
+quoted_string = ${ (single_quoted | double_quoted) }
+
+single_quoted = _{ "'" ~ single_inner ~ "'" }
+single_inner  = @{ (!"'" ~ ANY)* }
+
+double_quoted = _{ "\"" ~ double_inner ~ "\"" }
+double_inner  = @{ (escaped_char | normal_char)* }
+
+escaped_char = _{ "\\" ~ ("\"" | "\\") }
+normal_char  = _{ !("\\" | "\"") ~ ANY }

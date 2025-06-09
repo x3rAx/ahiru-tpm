@@ -4,3 +4,5 @@ pub mod plugins;
 pub mod repo_url;
 pub mod spec;
 pub mod tmux;
+pub mod tmux_config_parser;
+
