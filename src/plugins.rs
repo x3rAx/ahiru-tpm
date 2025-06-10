@@ -116,7 +116,7 @@ fn install_plugin(plugin: &Plugin) -> Result<()> {
     };
 
     run_cmd!(
-        git clone --single-branch --recursive $[branch_args] $url $path;
+        GIT_TERMINAL_PROMPT=0 git clone --single-branch --recursive $[branch_args] $url $path;
     )
     .context(format!(r#"Failed to install plugin "{}""#, plugin.name()))
 }
@@ -219,8 +219,8 @@ fn update_plugin(plugin: &Plugin) -> Result<()> {
 
     run_cmd!(
         cd $path;
-        git pull --rebase;
-        git submodule update --init --recursive;
+        GIT_TERMINAL_PROMPT=0 git pull --rebase;
+        GIT_TERMINAL_PROMPT=0 git submodule update --init --recursive;
 
     )
     .context(format!(r#"Failed to update plugin "{}""#, plugin.name()))
