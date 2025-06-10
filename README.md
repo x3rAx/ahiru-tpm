@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://gitlab.com/x3ro/tpm-rs/-/raw/main/duck_using_tmux_chatgpt.png"
+    <img src=".res/duck_using_tmux_chatgpt.png"
         alt="A duck using tmux (generated with ChatGPT)" width="300">
 </div>
 
