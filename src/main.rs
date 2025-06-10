@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
 use tpm_rs::{
-    args::{Action, Args, UpdateArgs},
+    args::{Action, Args},
     plugins::{self},
 };
 
@@ -14,9 +14,8 @@ fn main() -> Result<()> {
         .init();
 
     match args.action {
-        Action::Install => plugins::install(),
-        Action::Update(UpdateArgs { all: true, .. }) => plugins::update_all(),
-        Action::Update(UpdateArgs { all: false, names }) => plugins::update(&names),
+        Action::Install(install_arga) => plugins::install(install_arga),
+        Action::Update(update_args) => plugins::update(update_args),
         Action::Load => plugins::load(),
         Action::Clean => plugins::clean(),
     }

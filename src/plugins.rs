@@ -12,6 +12,7 @@ use log::{info, warn};
 use rayon::prelude::*;
 
 use crate::{
+    args::{InstallArgs, UpdateArgs},
     plugin::Plugin,
     spec::Spec,
     tmux::{self, ensure_plugins_dir_exists},
@@ -80,17 +81,22 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
     Ok(plugins)
 }
 
-pub fn install() -> Result<()> {
+pub fn install(args: InstallArgs) -> Result<()> {
     if do_parallel() {
         get_plugins()?.par_iter().try_for_each(install_plugin)
     } else {
         get_plugins()?.iter().try_for_each(install_plugin)
     }?;
 
-    load()?;
+    if args.load {
+        load()?;
+    }
 
     println!("==> Done installing plugins.");
-    println!("==> Plugins have been reloaded.");
+    if args.load {
+        println!("==> Plugins have been reloaded.");
+    }
+
     Ok(())
 }
 
@@ -145,7 +151,26 @@ fn load_plugin(plugin: &Plugin) -> Result<()> {
     Ok(())
 }
 
-pub fn update_all() -> Result<()> {
+pub fn update(args: UpdateArgs) -> Result<()> {
+    if args.all {
+        update_all()?;
+    } else {
+        update_list(&args.names)?;
+    }
+
+    if args.load {
+        load()?;
+    }
+
+    println!("==> Done updating plugins.");
+    if args.load {
+        println!("==> Plugins have been reloaded.");
+    }
+
+    Ok(())
+}
+
+fn update_all() -> Result<()> {
     let plugins: Vec<Plugin> = get_plugins()?
         .into_iter()
         .filter(|plugin| plugin.is_installed())
@@ -155,16 +180,10 @@ pub fn update_all() -> Result<()> {
         plugins.par_iter().try_for_each(update_plugin)
     } else {
         plugins.iter().try_for_each(update_plugin)
-    }?;
-
-    load()?;
-
-    println!("==> Done updating plugins.");
-    println!("==> Plugins have been reloaded.");
-    Ok(())
+    }
 }
 
-pub fn update<T: AsRef<str>>(names: &[T]) -> Result<()> {
+fn update_list<T: AsRef<str>>(names: &[T]) -> Result<()> {
     let plugin_map: HashMap<_, _> = get_plugins()?
         .into_iter()
         .map(|plugin| (plugin.name().to_owned(), plugin))
