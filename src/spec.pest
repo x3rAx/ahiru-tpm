@@ -1,4 +1,5 @@
-spec      = _{ SOI ~ (full_url | short_url) ~ ("#" ~ branch)? ~ EOI }
+spec      = _{ SOI ~ url ~ ("#" ~ branch)? ~ EOI }
+url       = _{ full_url | short_url }
 full_url  =  { "http" ~ "s"? ~ "://" ~ ((!"/" ~ ANY)+ ~ "/")+ ~ repo ~ ".git"? }
 short_url =  { user ~ "/" ~ repo }
 
