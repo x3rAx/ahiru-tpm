@@ -243,15 +243,26 @@ set -g @tpm_parallel 'false'
 
 ### Key Bindings
 
-The key bindings are currently hard coded. Although the default keybindings
-from the original TPM work here as well, it is discouraged and we recommend to
-use the more mnemonic key bindings:
+Although the default keybindings from the original TPM work here as well, it is
+discouraged and we recommend to use these more mnemonic key bindings:
 
 | Key bindings         | Description                    |
 | -------------------- | ------------------------------ |
 | `prefix` + `alt + I` | **I**nstall and reload plugins |
 | `prefix` + `alt + U` | **U**pdate and reload plugins  |
 | `prefix` + `alt + C` | **C**lean plugins              |
+
+To change the key bindings add the following to your tmux config:
+
+```tmux
+set -g @tpm-bind-install 'M-I'
+set -g @tpm-bind-update 'M-U'
+set -g @tpm-bind-clean 'M-C'
+```
+
+> [!Note]
+> As soon as one of the keymaps is changed, the respective "tpm-legacy" binding
+> will be disabled and only the one defined by `@tpm-bind-*` will be used.
 
 ## Benchmark
 
