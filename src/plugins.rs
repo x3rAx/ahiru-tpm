@@ -16,6 +16,7 @@ use crate::{
     spec::Spec,
     tmux::{self, ensure_plugins_dir_exists},
     tmux_config_parser::{self, ConfigDirective},
+    utils,
 };
 
 pub fn load_specs() -> Result<Vec<Spec>> {
@@ -25,7 +26,7 @@ pub fn load_specs() -> Result<Vec<Spec>> {
         return Err(anyhow!("Failed to find any tmux config files"));
     };
 
-    configs
+    let specs: Vec<Spec> = configs
         .into_iter()
         .map(|p| {
             get_specs_from_config(&p).context(format!(
@@ -34,7 +35,9 @@ pub fn load_specs() -> Result<Vec<Spec>> {
             ))
         })
         .flatten_ok()
-        .collect::<Result<Vec<_>>>()
+        .collect::<Result<Vec<_>>>()?;
+
+    Ok(specs)
 }
 
 fn get_specs_from_config(path: &Path) -> Result<Vec<Spec>> {
@@ -55,7 +58,14 @@ fn get_specs_from_config(path: &Path) -> Result<Vec<Spec>> {
 }
 
 pub fn get_plugins() -> Result<Vec<Plugin>> {
-    Ok(load_specs()?.into_iter().map(Plugin::from).collect())
+    let plugins: Vec<Plugin> = load_specs()?.into_iter().map(Plugin::from).collect();
+    utils::ensure_unique_by_key(&plugins, |p| p.name().to_owned()).map_err(|plugin| {
+        anyhow!(
+            r#"More than one plugin with the name "{}" has been specified"#,
+            plugin.name()
+        )
+    })?;
+    Ok(plugins)
 }
 
 pub fn install() -> Result<()> {
