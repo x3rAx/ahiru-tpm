@@ -1,9 +1,9 @@
-use anyhow::Result;
-use clap::Parser;
-use tpm_rs::{
+use ahiru_tpm::{
     args::{Action, Args},
     plugins::{self},
 };
+use anyhow::Result;
+use clap::Parser;
 
 //#[cmd_lib::main]
 fn main() -> Result<()> {

@@ -4,7 +4,7 @@
 args@{
   release ? true,
   rootFeatures ? [
-    "tpm-rs/default"
+    "ahiru-tpm/default"
   ],
   rustPackages,
   buildRustPackages,
@@ -25,7 +25,7 @@ args@{
   cargoConfig ? {},
 }:
 let
-  nixifiedLockHash = "eb127ea6f483c2a54d1b98fe2fda97b485957bc97d1f72331066f0dc039d05a2";
+  nixifiedLockHash = "7c3746ea532bbc23b9b5a0d87b5f3ced38c5469a9e7c21486479a73a5e39e3b8";
   workspaceSrc = if args.workspaceSrc == null then ./. else args.workspaceSrc;
   currentLockHash = builtins.hashFile "sha256" (workspaceSrc + /Cargo.lock);
   lockHashIgnored = if ignoreLockHash
@@ -53,8 +53,34 @@ in
 {
   cargo2nixVersion = "0.11.0";
   workspace = {
-    tpm-rs = rustPackages.unknown.tpm-rs."0.4.0";
+    ahiru-tpm = rustPackages.unknown.ahiru-tpm."0.4.0";
   };
+  "unknown".ahiru-tpm."0.4.0" = overridableMkRustCrate (profileName: rec {
+    name = "ahiru-tpm";
+    version = "0.4.0";
+    registry = "unknown";
+    src = fetchCrateLocal workspaceSrc;
+    dependencies = {
+      anyhow = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.98" { inherit profileName; }).out;
+      clap = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".clap."4.5.40" { inherit profileName; }).out;
+      cmd_lib = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".cmd_lib."1.9.5" { inherit profileName; }).out;
+      env_logger = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".env_logger."0.11.8" { inherit profileName; }).out;
+      getset = (buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".getset."0.1.5" { profileName = "__noProfile"; }).out;
+      glob = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".glob."0.3.2" { inherit profileName; }).out;
+      is_executable = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".is_executable."1.0.4" { inherit profileName; }).out;
+      itertools = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".itertools."0.14.0" { inherit profileName; }).out;
+      log = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".log."0.4.27" { inherit profileName; }).out;
+      once_cell = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".once_cell."1.21.3" { inherit profileName; }).out;
+      pest = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".pest."2.8.0" { inherit profileName; }).out;
+      pest_derive = (buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".pest_derive."2.8.0" { profileName = "__noProfile"; }).out;
+      rayon = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".rayon."1.10.0" { inherit profileName; }).out;
+      regex = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".regex."1.11.1" { inherit profileName; }).out;
+      thiserror = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".thiserror."2.0.12" { inherit profileName; }).out;
+      url = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".url."2.5.4" { inherit profileName; }).out;
+      xdir = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".xdir."0.1.0" { inherit profileName; }).out;
+    };
+  });
+  
   "registry+https://github.com/rust-lang/crates.io-index".aho-corasick."1.1.3" = overridableMkRustCrate (profileName: rec {
     name = "aho-corasick";
     version = "1.1.3";
@@ -1262,32 +1288,6 @@ in
     dependencies = {
       displaydoc = (buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".displaydoc."0.2.5" { profileName = "__noProfile"; }).out;
       zerovec = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".zerovec."0.11.2" { inherit profileName; }).out;
-    };
-  });
-  
-  "unknown".tpm-rs."0.4.0" = overridableMkRustCrate (profileName: rec {
-    name = "tpm-rs";
-    version = "0.4.0";
-    registry = "unknown";
-    src = fetchCrateLocal workspaceSrc;
-    dependencies = {
-      anyhow = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".anyhow."1.0.98" { inherit profileName; }).out;
-      clap = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".clap."4.5.40" { inherit profileName; }).out;
-      cmd_lib = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".cmd_lib."1.9.5" { inherit profileName; }).out;
-      env_logger = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".env_logger."0.11.8" { inherit profileName; }).out;
-      getset = (buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".getset."0.1.5" { profileName = "__noProfile"; }).out;
-      glob = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".glob."0.3.2" { inherit profileName; }).out;
-      is_executable = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".is_executable."1.0.4" { inherit profileName; }).out;
-      itertools = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".itertools."0.14.0" { inherit profileName; }).out;
-      log = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".log."0.4.27" { inherit profileName; }).out;
-      once_cell = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".once_cell."1.21.3" { inherit profileName; }).out;
-      pest = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".pest."2.8.0" { inherit profileName; }).out;
-      pest_derive = (buildRustPackages."registry+https://github.com/rust-lang/crates.io-index".pest_derive."2.8.0" { profileName = "__noProfile"; }).out;
-      rayon = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".rayon."1.10.0" { inherit profileName; }).out;
-      regex = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".regex."1.11.1" { inherit profileName; }).out;
-      thiserror = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".thiserror."2.0.12" { inherit profileName; }).out;
-      url = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".url."2.5.4" { inherit profileName; }).out;
-      xdir = (rustPackages."registry+https://github.com/rust-lang/crates.io-index".xdir."0.1.0" { inherit profileName; }).out;
     };
   });
   

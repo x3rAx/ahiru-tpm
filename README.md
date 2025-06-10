@@ -1,20 +1,28 @@
 <div align="center">
-    <img src=".res/duck_using_tmux_chatgpt.png"
-        alt="A duck using tmux (generated with ChatGPT)" width="300">
+    <figure>
+        <img src=".res/duck_using_tmux_chatgpt.png"
+            alt="A duck using tmux (generated with ChatGPT)" width="300">
+        <figcaption>
+            <i>
+                This is <b>Ahiru</b> 🦆<br />
+                She's happy to manage your <b>tmux</b> plugins for you.<br />
+            </i>
+        </figcaption>
+    </figure>
 </div>
 
-# Tmux Plugin Manager RS :crab:
+# Ahiru-TPM 🦆
 
-<small>_A drop-in replacement for the famous [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm), written in Rust._</small>
+> _A drop-in replacement for the famous [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm), written in Rust._
 
-**tpm-rs** installs, loads and manages **tmux** plugins.
+**Ahiru-TPM** installs, loads and manages **tmux** plugins.
 
 Plugins are loaded in parallel for maximum tmux startup speed (see
 [Benchmark](#benchmark)).
 
 A curated list of plugins can be found
-[here](https://github.com/tmux-plugins/list) (thanks to [Bruno
-Sutic](https://github.com/bruno-) for maintaining the list).
+[here](https://github.com/tmux-plugins/list). (Thanks to [Bruno
+Sutic](https://github.com/bruno-) for maintaining the list)
 
 <!-- toc -->
 
@@ -38,7 +46,7 @@ Sutic](https://github.com/bruno-) for maintaining the list).
 
 ## Installation
 
-To let **tpm-rs** manage your tmux plugins, add the following at the end of
+To let **Ahiru-TPM** manage your tmux plugins, add the following at the end of
 your tmux config (either in `~/.tmux.conf` or
 `${XDG_CONFIG_HOME}/tmux/tmux.conf`):
 
@@ -47,15 +55,15 @@ your tmux config (either in `~/.tmux.conf` or
 > If you want tmux to start up even faster, change the last line to
 >
 > ```tmux
-> tmux run -b 'tpm init'
+> tmux run -b 'ahiru-tpm init'
 > ```
 >
 > The `-b` runs the init command in the background. This means that `tmux` will
-> not wait until `tpm` has initialized but it might cause a bit of flickering
-> until all plugins (e.g. themes) are loaded.
+> not wait until `ahiru-tpm` has initialized but it might cause a bit of
+> flickering until all plugins (e.g. themes) are loaded.
 
 ```tmux
-# List of plugins (install by running `tpm install`)
+# List of plugins (install by running `ahiru-tpm install`)
     set -g @plugin 'tmux-plugins/tmux-sensible'
     set -g @plugin 'x3rAx/tmux-yank#yank-action-mouse'
     set -g @plugin 'catppuccin/tmux'
@@ -65,17 +73,17 @@ your tmux config (either in `~/.tmux.conf` or
     # set -g @plugin 'github_username/plugin_name#branch'
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
-run 'tpm init'
+run 'ahiru-tpm init'
 ```
 
-Then proceed with one of the following install methods to get `tpm-rs`
+Then proceed with one of the following install methods to get **Ahiru-TPM**
 installed on your system:
 
 ### Nix Flakes
 
-> _Thanks to [Yazi](https://github.com/yazi-rs/) for the flake template below._
+_(Thanks to [Yazi](https://github.com/yazi-rs/) for the flake template below.)_
 
-Below is a basic `flake.nix` showcasing how to add `tpm-rs` to system packages
+Below is a basic `flake.nix` showcasing how to add **Ahiru-TPM** to system packages
 and through home-manager:
 
 <details>
@@ -91,8 +99,8 @@ and through home-manager:
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    tpm-rs = {
-      url = "gitlab:x3ro/tpm-rs";
+    ahiru-tpm = {
+      url = "gitlab:x3ro/ahiru-tpm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -100,15 +108,15 @@ and through home-manager:
   outputs = {
     nixpkgs,
     home-manager,
-    tpm-rs,
+    ahiru-tpm,
     ...
   }: {
-    # To install tpm-rs system-wide:
+    # To install ahiru-tpm system-wide:
     nixosConfigurations = {
       "nixos" = nixpkgs.lib.nixosSystem {
         modules = [
           ({pkgs, ...}: {
-            environment.systemPackages = [tpm-rs.packages.${pkgs.system}.default];
+            environment.systemPackages = [ahiru-tpm.packages.${pkgs.system}.default];
           })
         ];
       };
@@ -120,7 +128,7 @@ and through home-manager:
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         modules = [
           ({pkgs, ...}: {
-            home.packages = [tpm-rs.packages.${pkgs.system}.default];
+            home.packages = [ahiru-tpm.packages.${pkgs.system}.default];
           })
         ];
       };
@@ -131,13 +139,13 @@ and through home-manager:
 
 </details>
 
-Essentially, add `gitlab:x3ro/tpm-rs` to your inputs:
+In essence, add `gitlab:x3ro/ahiru-tpm` to your inputs:
 
 ```nix
 {
   inputs = {
-    tpm-rs = {
-      url = "gitlab:x3ro/tpm-rs";
+    ahiru-tpm = {
+      url = "gitlab:x3ro/ahiru-tpm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -149,7 +157,7 @@ Essentially, add `gitlab:x3ro/tpm-rs` to your inputs:
 Then add the following to your packages list:
 
 ```nix
-tpm-rs.packages.${pkgs.system}.default
+ahiru-tpm.packages.${pkgs.system}.default
 ```
 
 ### Build from source
@@ -164,11 +172,11 @@ rustup update
 Clone the repository:
 
 ```sh
-git clone https://gitlab.com/x3ro/tpm-rs.git
-cd tpm-rs
+git clone https://gitlab.com/x3ro/ahiru-tpm.git
+cd ahiru-tpm
 ```
 
-Then build `tpm-rs`:
+Then build `ahiru-tpm`:
 
 ```sh
 cargo build --locked
@@ -187,7 +195,7 @@ cargo install --locked --path .
 Plugins can be installed by adding them to to the tmux config and running
 
 ```sh
-tpm install
+ahiru-tpm install
 ```
 
 No need to reload tmux config first.
@@ -215,7 +223,7 @@ github_username/plugin_name#branch
 To update plugins run:
 
 ```sh
-tpm update
+ahiru-tpm update
 ```
 
 ### Uninstalling Plugins
@@ -224,7 +232,7 @@ To uninstall plugins, first remove them from your tmux config. Then, to clean
 up downloaded plugins, run:
 
 ```sh
-tpm clean
+ahiru-tpm clean
 ```
 
 ### Settings
@@ -266,8 +274,9 @@ set -g @tpm-bind-clean 'M-C'
 
 ## Benchmark
 
-In this section we compare the perforemance of the original `tpm` written in
-bash and this `tpm-rs` using parallel processing written in rust.
+In this section we compare the perforemance of the original **TPM** written in
+bash with the one of **Ahiru-TPM** which uses parallel processing and is
+written in rust.
 
 Of course, the loading speed is heavily dependent on the plugins you have,
 other processes running on the system and the hardware you are running on.
@@ -303,18 +312,20 @@ set -g @plugin 'noscript/tmux-mighty-scroll'
 ### 2x Faster Plugins Installation
 
 ```sh
-hyperfine --warmup 5 --runs 25 --shell nu --prepare 'rm -rf ~/.local/share/tmux/plugins' -n 'tpm-rs' 'tpm install' --prepare 'ls ~/.config/tmux/plugins/ | where ($it.name | path basename) != tpm | each {rm -rf $in.name}' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/bin/install_plugins'
+hyperfine --warmup 5 --runs 25 --shell nu --prepare 'rm -rf ~/.local/share/tmux/plugins' -n 'ahiru-tpm' 'ahiru-tpm install' --prepare 'ls ~/.config/tmux/plugins/ | where ($it.name | path basename) != tpm | each {rm -rf $in.name}' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/bin/install_plugins'
 ```
 
-![Benchmark installing plugins with `tpm-rs` vs. `tpm`. `tpm-rs` ran 2.54 times faster than `tpm`.](.res/hyperfine-tpm-install.png)
+![Benchmark installing plugins with `ahiru-tpm` vs. `tpm`. `ahiru-tpm` ran 2.54 times faster than `tpm`.](.res/hyperfine-tpm-install.png)
+_Note: The screenshot shows **Ahiru-TPM** as `tpm-rs`, which was the prototype name._
 
 ### 5x Faster Plugins Loading
 
 ```sh
-hyperfine --warmup 10 --runs 100 --shell nu -n 'tpm-rs' 'tpm load' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/scripts/source_plugins.sh'
+hyperfine --warmup 10 --runs 100 --shell nu -n 'ahiru-tpm' 'ahiru-tpm load' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/scripts/source_plugins.sh'
 ```
 
-![Benchmark loading plugins with `tpm-rs` vs. `tpm`. `tpm-rs` ran 5.62 times faster than `tpm`.](.res/hyperfine-tpm-load.png)
+![Benchmark loading plugins with `ahiru-tpm` vs. `tpm`. `ahiru-tpm` ran 5.62 times faster than `tpm`.](.res/hyperfine-tpm-load.png)
+_Note: The screenshot shows **Ahiru-TPM** as `tpm-rs`, which was the prototype name._
 
 ## License
 

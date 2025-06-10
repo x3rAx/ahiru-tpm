@@ -26,16 +26,16 @@ pub fn setup() -> Result<()> {
 
     setup_tpm_compatibility(&binds)?;
 
-    // --- TPM-RS sensible keymaps ---
+    // --- Ahiru-TPM sensible keymaps ---
 
     let install_key = binds.install_key.unwrap_or("M-I".into());
     let update_key = binds.update_key.unwrap_or("M-U".into());
     let clean_key = binds.clean_key.unwrap_or("M-C".into());
 
     run_cmd!(
-        tmux bind-key $install_key display-popup r"tpm install --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
-        tmux bind-key $update_key display-popup r"tpm update --all --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
-        tmux bind-key $clean_key display-popup r"tpm clean; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key $install_key display-popup r"ahiru-tpm install --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key $update_key display-popup r"ahiru-tpm update --all --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key $clean_key display-popup r"ahiru-tpm clean; echo $'\n--- Done. Press ESC to close this popup. ---'";
     )
     .context("Failed to setup keymaps")
 }
@@ -46,7 +46,7 @@ fn setup_tpm_compatibility(key_maps: &KeyBindings) -> Result<()> {
             tmux bind-key "I" display-popup r"\
             echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+I> instead   /!\';
             echo ''
-            tpm install
+            ahiru-tpm install
             echo $'\n--- Done. Press ESC to close this popup. ---'
         ";
         )
@@ -58,7 +58,7 @@ fn setup_tpm_compatibility(key_maps: &KeyBindings) -> Result<()> {
             tmux bind-key "U" display-popup r"
             echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+I> instead   /!\';
             echo ''
-            tpm update --all
+            ahiru-tpm update --all
             echo $'\n--- Done. Press ESC to close this popup. ---'
         ";
         )
@@ -70,7 +70,7 @@ fn setup_tpm_compatibility(key_maps: &KeyBindings) -> Result<()> {
             tmux bind-key "M-u" display-popup r"
             echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+C> instead   /!\';
             echo ''
-            tpm clean
+            ahiru-tpm clean
             echo $'\n--- Done. Press ESC to close this popup. ---'
         ";
         )
