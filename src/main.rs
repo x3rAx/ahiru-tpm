@@ -5,7 +5,7 @@ use tpm_rs::{
     plugins::{self},
 };
 
-#[cmd_lib::main]
+//#[cmd_lib::main]
 fn main() -> Result<()> {
     let args = Args::parse();
 
