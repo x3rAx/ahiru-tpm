@@ -25,7 +25,7 @@ args@{
   cargoConfig ? {},
 }:
 let
-  nixifiedLockHash = "6118e764a8b02693ad13788f8a88594c9a54c3ca9330dd370a34db51b935b7de";
+  nixifiedLockHash = "6eb3bc26f44e7a8664501071bcedefd91797026370d822dd87217a93aac31034";
   workspaceSrc = if args.workspaceSrc == null then ./. else args.workspaceSrc;
   currentLockHash = builtins.hashFile "sha256" (workspaceSrc + /Cargo.lock);
   lockHashIgnored = if ignoreLockHash
@@ -53,7 +53,7 @@ in
 {
   cargo2nixVersion = "0.11.0";
   workspace = {
-    tpm-rs = rustPackages.unknown.tpm-rs."0.2.0";
+    tpm-rs = rustPackages.unknown.tpm-rs."0.3.0";
   };
   "registry+https://github.com/rust-lang/crates.io-index".aho-corasick."1.1.3" = overridableMkRustCrate (profileName: rec {
     name = "aho-corasick";
@@ -1265,9 +1265,9 @@ in
     };
   });
   
-  "unknown".tpm-rs."0.2.0" = overridableMkRustCrate (profileName: rec {
+  "unknown".tpm-rs."0.3.0" = overridableMkRustCrate (profileName: rec {
     name = "tpm-rs";
-    version = "0.2.0";
+    version = "0.3.0";
     registry = "unknown";
     src = fetchCrateLocal workspaceSrc;
     dependencies = {
