@@ -17,6 +17,21 @@ pub struct Spec {
 }
 
 impl Spec {
+    pub fn try_from_url(value: &str) -> Result<Spec> {
+        println!("try_from_url: {value}");
+        if value.is_empty() {
+            Err(anyhow!("Plugin URL must not be empty"))
+        } else if value.contains(';') {
+            println!("contains ';'");
+            Err(anyhow!(
+                "Attributes are not supported in legacy plugin definition using `@tpm_plugins`"
+            )
+            .context(format!("Failed to parse: {value}")))
+        } else {
+            parse_spec(value)
+        }
+    }
+
     pub fn branch(&self) -> Option<&str> {
         self.branch.as_deref()
     }
@@ -72,7 +87,7 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
                     .map(|r| r.as_str().to_string());
             }
             Rule::EOI => break,
-            Rule::spec | Rule::user | Rule::repo | Rule::ident => unreachable!(),
+            Rule::spec | Rule::url | Rule::user | Rule::repo | Rule::ident => unreachable!(),
         };
     }
 

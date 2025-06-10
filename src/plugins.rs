@@ -58,13 +58,25 @@ fn get_specs_from_config(path: &Path) -> Result<Vec<Spec>> {
 }
 
 pub fn get_plugins() -> Result<Vec<Plugin>> {
+    let legacy_plugins: Vec<Plugin> = tmux::get_option("@tpm_plugins")
+        .unwrap_or("".to_owned())
+        .split(' ')
+        .filter(|&spec| !spec.is_empty())
+        .map(Spec::try_from_url)
+        .map_ok(Plugin::from)
+        .collect::<Result<_>>()?;
+
     let plugins: Vec<Plugin> = load_specs()?.into_iter().map(Plugin::from).collect();
+
+    let plugins: Vec<Plugin> = legacy_plugins.into_iter().chain(plugins).collect();
+
     utils::ensure_unique_by_key(&plugins, |p| p.name().to_owned()).map_err(|plugin| {
         anyhow!(
             r#"More than one plugin with the name "{}" has been specified"#,
             plugin.name()
         )
     })?;
+
     Ok(plugins)
 }
 
