@@ -3,6 +3,29 @@
 version = 4
 
 [[package]]
+name = "ahiru-tpm"
+version = "0.4.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "cmd_lib",
+ "env_logger 0.11.8",
+ "getset",
+ "glob",
+ "is_executable",
+ "itertools",
+ "log",
+ "once_cell",
+ "pest",
+ "pest_derive",
+ "rayon",
+ "regex",
+ "thiserror",
+ "url",
+ "xdir",
+]
+
+[[package]]
 name = "aho-corasick"
 version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -832,29 +855,6 @@ checksum = "5d4f6d1145dcb577acf783d4e601bc1d76a13337bb54e6233add580b07344c8b"
 dependencies = [
  "displaydoc",
  "zerovec",
-]
-
-[[package]]
-name = "tpm-rs"
-version = "0.4.0"
-dependencies = [
- "anyhow",
- "clap",
- "cmd_lib",
- "env_logger 0.11.8",
- "getset",
- "glob",
- "is_executable",
- "itertools",
- "log",
- "once_cell",
- "pest",
- "pest_derive",
- "rayon",
- "regex",
- "thiserror",
- "url",
- "xdir",
 ]
 
 [[package]]

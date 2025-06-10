@@ -29,7 +29,7 @@
         overlays = [
           (import rust-overlay)
           cargo2nix.overlays.default
-          (final: prev: { cargo2nix = cargo2nix.packages.${system}.cargo2nix;})
+          (final: prev: {cargo2nix = cargo2nix.packages.${system}.cargo2nix;})
         ];
 
         pkgs = import nixpkgs {inherit system overlays;};
@@ -38,21 +38,12 @@
           rustVersion = "1.87.0";
           packageFun = import ./Cargo.nix;
         };
-
       in rec {
-        devShells.default = import ./shell.nix { inherit pkgs; };
+        devShells.default = import ./shell.nix {inherit pkgs;};
 
         packages = {
-          default = packages.tpm-rs;
-          tpm-rs = (rustPkgs.workspace.tpm-rs {});
-        };
-
-        apps = {
-          default = apps.tpm;
-          tpm = {
-            type = "app";
-            program = "${packages.tpm-rs}/bin/tpm";
-          };
+          default = packages.ahiru-tpm;
+          ahiru-tpm = rustPkgs.workspace.ahiru-tpm {};
         };
       }
     );
