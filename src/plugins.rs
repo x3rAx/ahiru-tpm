@@ -254,12 +254,12 @@ pub fn clean() -> Result<()> {
 }
 
 fn do_parallel() -> bool {
-    match tmux::get_option("@tpm_parallel").as_deref() {
+    match tmux::get_option("@tpm-parallel").as_deref() {
         None => true,
         Some("true") | Some("yes") => true,
         Some("false") | Some("no") => false,
         Some(val) => {
-            warn!(r#"Invalid value "{val}" for option `@tpm_parallel`. Falling back to "true""#);
+            warn!(r#"Invalid value "{val}" for option `@tpm-parallel`. Falling back to "true""#);
             true
         }
     }
