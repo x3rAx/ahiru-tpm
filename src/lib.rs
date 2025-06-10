@@ -1,4 +1,5 @@
 pub mod args;
+pub mod key_bindings;
 pub mod plugin;
 pub mod plugins;
 pub mod repo_url;
