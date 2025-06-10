@@ -238,7 +238,7 @@ reason.
 This can be done by setting the following in the tmux config:
 
 ```tmux
-set -g @tpm_parallel 'false'
+set -g @tpm-parallel 'false'
 ```
 
 ### Key Bindings
