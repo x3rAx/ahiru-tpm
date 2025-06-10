@@ -146,7 +146,9 @@ fn load_plugin(plugin: &Plugin) -> Result<()> {
         let init_file = entry.to_str().context("Path is not valid UTF-8")?;
 
         // Run the init plugin file
-        run_cmd!($init_file).context(format!(r#"Failed to load plugin "{}""#, plugin.name()))?;
+        run_cmd!($init_file)
+            .or_else(|_| run_cmd!(/bin/sh $init_file))
+            .context(format!(r#"Failed to load plugin "{}""#, plugin.name()))?;
     }
     Ok(())
 }
