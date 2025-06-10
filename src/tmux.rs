@@ -53,36 +53,58 @@ pub fn ensure_plugins_dir_exists() -> Result<PathBuf> {
 }
 
 pub fn setup_keymaps() -> Result<()> {
-    // TPM Compatibility
-    run_cmd!(
-        tmux bind-key "I" display-popup r"\
+    let install_key = get_option("@tpm-bind-install").or_else(|| get_option("@tpm-install"));
+    let update_key = get_option("@tpm-bind-update").or_else(|| get_option("@tpm-update"));
+    let clean_key = get_option("@tpm-bind-clean").or_else(|| get_option("@tpm-clean"));
+
+    // --- TPM Compatibility (set only when key-option is not set) ---
+
+    if install_key.is_none() {
+        run_cmd!(
+            tmux bind-key "I" display-popup r"\
             echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+I> instead   /!\';
             echo ''
             tpm install
             echo $'\n--- Done. Press ESC to close this popup. ---'
         ";
+        )
+        .context("Failed to setup install keymap for TPM compatibility")?;
+    }
 
-        tmux bind-key "U" display-popup r"
+    if update_key.is_none() {
+        run_cmd!(
+            tmux bind-key "U" display-popup r"
             echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+I> instead   /!\';
             echo ''
             tpm update --all
             echo $'\n--- Done. Press ESC to close this popup. ---'
         ";
+        )
+        .context("Failed to setup update keymap for TPM compatibility")?;
+    }
 
-        tmux bind-key "M-u" display-popup r"
+    if clean_key.is_none() {
+        run_cmd!(
+            tmux bind-key "M-u" display-popup r"
             echo '  /!\   This keymap is deprecated. Please use Prefix+<Alt+C> instead   /!\';
             echo ''
             tpm clean
             echo $'\n--- Done. Press ESC to close this popup. ---'
         ";
-    )
-    .context("Failed to setup keymaps for TPM compatibility")?;
+        )
+        .context("Failed to setup clean keymap for TPM compatibility")?;
+    }
 
-    // TPM-RS sensible keymaps
+    // --- TPM-RS sensible keymaps ---
+
+    let install_key = install_key.unwrap_or("M-I".into());
+    let update_key = update_key.unwrap_or("M-U".into());
+    let clean_key = clean_key.unwrap_or("M-C".into());
+
     run_cmd!(
-        tmux bind-key "M-I" display-popup r"tpm install --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
-        tmux bind-key "M-U" display-popup r"tpm update --all --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
-        tmux bind-key "M-C" display-popup r"tpm clean; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key $install_key display-popup r"tpm install --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key $update_key display-popup r"tpm update --all --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key $clean_key display-popup r"tpm clean; echo $'\n--- Done. Press ESC to close this popup. ---'";
     )
     .context("Failed to setup keymaps")
 }
