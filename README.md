@@ -258,17 +258,35 @@ use the more mnemonic key bindings:
 In this section we compare the perforemance of the original `tpm` written in
 bash and this `tpm-rs` using parallel processing written in rust.
 
-Of course, the loading speed is heavily dependent on the plugins you have. To
-make it more transparent and reproducible, here's the list of plugins the
-benchmarks were run with:
+Of course, the loading speed is heavily dependent on the plugins you have,
+other processes running on the system and the hardware you are running on.
+Therefore the times in the benchmarks are not hard facts but they instead show
+a trend.
+
+I closed most of my user apps during benchmarks so that the benchmark runs
+without any interruptions and the CPU is not temporarily overloaded by other
+programs.
+
+As hardware didn't change between benchmark runs, it's less important but
+here's my `inxi` output for completeness:
+
+```
+ ❯ inxi
+CPU: 14-core (6-mt/8-st) 13th Gen Intel Core i5-13600KF (-MST AMCP-)
+speed/min/max: 1100/800/5100:3900 MHz Kernel: 6.12.31 x86_64 Up: 6d 6h 35m
+Mem: 7.23/31.17 GiB (23.2%) Storage: 5.97 TiB (59.9% used) Procs: 547
+Shell: nu inxi: 3.3.38
+```
+
+To make it a bit more reproducible, here's the list of plugins the benchmarks
+were run with:
 
 ```tmux
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
 set -g @plugin 'christoomey/vim-tmux-navigator'
 set -g @plugin 'catppuccin/tmux'
-set -g @plugin 'x3rAx/tmux-yank#yank-action-mouse'
-set -g @plugin 'https://gitlab.com/x3ro/tpm-rs.git'
+set -g @plugin 'noscript/tmux-mighty-scroll'
 ```
 
 ### 2x Faster Plugins Installation
@@ -277,7 +295,7 @@ set -g @plugin 'https://gitlab.com/x3ro/tpm-rs.git'
 hyperfine --warmup 5 --runs 25 --shell nu --prepare 'rm -rf ~/.local/share/tmux/plugins' -n 'tpm-rs' 'tpm install' --prepare 'ls ~/.config/tmux/plugins/ | where ($it.name | path basename) != tpm | each {rm -rf $in.name}' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/bin/install_plugins'
 ```
 
-![Benchmark installing plugins with `tpm-rs` vs. `tpm`. `tpm-rs` ran 2.54 times faster than `tpm`](.res/hyperfine-tpm-install.png)
+![Benchmark installing plugins with `tpm-rs` vs. `tpm`. `tpm-rs` ran 2.54 times faster than `tpm`.](.res/hyperfine-tpm-install.png)
 
 ### 5x Faster Plugins Loading
 
@@ -285,7 +303,7 @@ hyperfine --warmup 5 --runs 25 --shell nu --prepare 'rm -rf ~/.local/share/tmux/
 hyperfine --warmup 10 --runs 100 --shell nu -n 'tpm-rs' 'tpm load' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/scripts/source_plugins.sh'
 ```
 
-![Benchmark loading plugins with `tpm-rs` vs. `tpm`. `tpm-rs` ran 5.62 times faster than `tpm`](.res/hyperfine-tpm-load.png)
+![Benchmark loading plugins with `tpm-rs` vs. `tpm`. `tpm-rs` ran 5.62 times faster than `tpm`.](.res/hyperfine-tpm-load.png)
 
 ## License
 
