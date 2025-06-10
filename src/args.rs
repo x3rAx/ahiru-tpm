@@ -10,13 +10,20 @@ pub struct Args {
 #[derive(Subcommand, Debug)]
 pub enum Action {
     /// Install plugins defined in tmux config
-    Install,
+    Install(InstallArgs),
     /// Update installed plugins that are defined in tmux config
     Update(UpdateArgs),
     /// Load plugins defined in tmux config
     Load,
     /// Clean plugins not listed in tmux config
     Clean,
+}
+
+#[derive(Parser, Debug)]
+pub struct InstallArgs {
+    /// Load plugins after install
+    #[arg(short, long)]
+    pub load: bool,
 }
 
 #[derive(Parser, Debug)]
@@ -29,6 +36,10 @@ pub struct UpdateArgs {
     /// Update all
     #[arg(short, long)]
     pub all: bool,
+
+    /// Load plugins after update
+    #[arg(short, long)]
+    pub load: bool,
 
     /// List of plugins to update
     pub names: Vec<String>,

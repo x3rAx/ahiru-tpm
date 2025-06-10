@@ -80,8 +80,8 @@ pub fn setup_keymaps() -> Result<()> {
 
     // TPM-RS sensible keymaps
     run_cmd!(
-        tmux bind-key "M-I" display-popup r"tpm install; echo $'\n--- Done. Press ESC to close this popup. ---'";
-        tmux bind-key "M-U" display-popup r"tpm update --all; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key "M-I" display-popup r"tpm install --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key "M-U" display-popup r"tpm update --all --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
         tmux bind-key "M-C" display-popup r"tpm clean; echo $'\n--- Done. Press ESC to close this popup. ---'";
     )
     .context("Failed to setup keymaps")
