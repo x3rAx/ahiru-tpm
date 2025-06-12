@@ -1,0 +1,39 @@
+name: Post New Issues to Codeberg
+
+on:
+  issues:
+    types: [opened]
+
+env:
+  DRY_RUN: false
+  CODEBERG_REPO: x3ro/ahiru-tpm
+
+jobs:
+  post-issue:
+    runs-on: ubuntu-latest
+    env:
+      CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post issue to Codeberg
+        id: post-issue
+        env:
+          GITHUB_ISSUE_TITLE: ${{ github.event.issue.title }}
+          GITHUB_ISSUE_BODY: ${{ github.event.issue.body }}
+          GITHUB_ISSUE_URL: ${{ github.event.issue.html_url }}
+          GITHUB_ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+        run: python3 .github/scripts/post-new-issue-to-codeberg/post-issue-to-codeberg.py
+
+      - name: Add GitHub label to Codeberg issue
+        env:
+          CODEBERG_ISSUE_NUMBER: ${{ steps.post-issue.outputs.codeberg_issue_number }}
+        run: python3 ${{ github.workspace }}/.github/scripts/post-new-issue-to-codeberg/add-label-to-codeberg-issue.py
+
+      - name: Post comment to GitHub issue
+        env:
+          CODEBERG_ISSUE_URL: ${{ steps.post-issue.outputs.codeberg_issue_url }}
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: python3 ${{ github.workspace }}/.github/scripts/post-new-issue-to-codeberg/post-comment-to-github-issue.py
