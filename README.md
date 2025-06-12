@@ -71,6 +71,7 @@ your tmux config (either in `~/.tmux.conf` or
     # Other examples:
     # set -g @plugin 'github_username/plugin_name'
     # set -g @plugin 'github_username/plugin_name#branch'
+    # set -g @plugin 'https://gitlab.com:user/plugin'
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
 run 'ahiru-tpm init'
@@ -271,6 +272,7 @@ set -g @tpm-bind-clean 'M-C'
 ```
 
 > [!Note]
+>
 > As soon as one of the keymaps is changed, the respective "tpm-legacy" binding
 > will be disabled and only the one defined by `@tpm-bind-*` will be used.
 
