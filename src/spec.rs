@@ -6,7 +6,10 @@ use log::{error, warn};
 use pest::{Parser, iterators::Pairs};
 use pest_derive::Parser;
 
-use crate::{attribute::Attribute, repo_url::RepoUrl};
+use crate::{
+    attribute::Attribute,
+    repo_url::{RepoUrl, UrlAlias},
+};
 
 #[derive(Debug, Getters, PartialEq, Clone)]
 pub struct Spec {
@@ -81,6 +84,37 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
                                 .find(|x| x.as_rule() == Rule::repo)
                                 .map(|r| r.as_str().to_string());
                         }
+                        Rule::alias_url => {
+                            let mut inner = pair.into_inner();
+                            let prefix = inner
+                                .find(|p| p.as_rule() == Rule::prefix)
+                                .expect("`alias_url` should contain `prefix`")
+                                .into_inner()
+                                .next()
+                                .expect("`prefix` should have a child");
+                            let url_alias = match prefix.as_rule() {
+                                Rule::prefix_codeberg => UrlAlias::Codeberg,
+                                Rule::prefix_github => UrlAlias::GitHub,
+                                Rule::prefix_gitlab => UrlAlias::GitLab,
+                                Rule::prefix_bitbucket => UrlAlias::BitBucket,
+
+                                _ => {
+                                    error!(
+                                        "Unexpected rule in `alias_url`: {:?}",
+                                        prefix.as_rule()
+                                    );
+                                    unreachable!();
+                                }
+                            };
+                            let short_url = inner
+                                .find(|p| p.as_rule() == Rule::short_url)
+                                .expect("`alias_url` should contain `short_url`");
+                            url = Some(RepoUrl::Alias(url_alias, short_url.as_str().to_string()));
+                            name = short_url
+                                .into_inner()
+                                .find(|x| x.as_rule() == Rule::repo)
+                                .map(|r| r.as_str().to_string());
+                        }
                         Rule::full_url => {
                             url = Some(RepoUrl::Full(pair.as_str().to_string()));
                             name = pair
@@ -105,6 +139,12 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
             Rule::WHITESPACE
             | Rule::spec
             | Rule::short_url
+            | Rule::alias_url
+            | Rule::prefix
+            | Rule::prefix_codeberg
+            | Rule::prefix_github
+            | Rule::prefix_gitlab
+            | Rule::prefix_bitbucket
             | Rule::full_url
             | Rule::branch
             | Rule::user

@@ -1,9 +1,16 @@
 WHITESPACE = _{ " " | "\t" }
 
 spec      = _{ SOI ~ url ~ attributes? ~ EOI }
-url       = ${ (short_url | full_url) ~ ("#" ~ branch)? }
+url       = ${ (short_url | alias_url | full_url) ~ ("#" ~ branch)? }
 short_url = ${ user ~ "/" ~ repo }
 full_url  = ${ ((!"/" ~ ANY)+ ~ "/")+ ~ repo ~ ".git"? }
+alias_url = ${ prefix ~ ":" ~ short_url }
+
+prefix           = { prefix_codeberg | prefix_github | prefix_gitlab | prefix_bitbucket }
+prefix_codeberg  = { "codeberg" }
+prefix_github    = { "github" }
+prefix_gitlab    = { "gitlab" }
+prefix_bitbucket = { "bitbucket" }
 
 user   = @{ ident }
 repo   = @{ ident }
