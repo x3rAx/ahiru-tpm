@@ -115,6 +115,7 @@ fn install_plugin(plugin: &Plugin) -> Result<()> {
         None => vec![],
     };
 
+    println!("Installing plugin {}", plugin);
     run_cmd!(
         GIT_TERMINAL_PROMPT=0 git clone --single-branch --recursive $[branch_args] $url $path;
     )
