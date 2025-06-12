@@ -20,3 +20,23 @@ bump version: ensure-cargo-bump
     cargo bump '{{version}}'
     # Run cargo2nix
     cargo2nix --overwrite
+
+
+test-gh-action--post-issue:
+    #!/usr/bin/env bash
+    trap 'rm $env_file' EXIT
+    env_file="$(mktemp)"
+    echo >"$env_file" '{
+        "issue": {
+            "title": "Test issue",
+            "body": "This is a test issue body",
+            "html_url": "https://github.com/test/repo/issues/1"
+        },
+        "repository": {
+            "full_name": "test/repo"
+        }
+    }'
+    # --secret-file \#__DEV__/act.secrets 
+    act issues \
+        -e "$env_file" \
+        --env DRY_RUN=true
