@@ -4,7 +4,7 @@
             alt="A duck using tmux (generated with ChatGPT)" width="300">
         <figcaption>
             <i>
-                This is <b>Ahiru</b> 🦆<br />
+                Meet <b>Ahiru</b> 🦆<br />
                 She's happy to manage your <b>tmux</b> plugins for you.<br />
             </i>
         </figcaption>
