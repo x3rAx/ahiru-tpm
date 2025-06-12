@@ -3,7 +3,7 @@ use std::{fmt::Display, path::PathBuf};
 use once_cell::sync::OnceCell;
 use url::Url;
 
-use crate::{spec::Spec, tmux};
+use crate::{attribute::Attribute, spec::Spec, tmux};
 
 pub struct Plugin {
     spec: Spec,
@@ -18,7 +18,10 @@ impl Plugin {
     }
 
     pub fn name(&self) -> &str {
-        self.spec.name()
+        self.spec
+            .attributes()
+            .get(&Attribute::Alias)
+            .unwrap_or_else(|| self.spec.name())
     }
 
     pub fn is_installed(&self) -> bool {

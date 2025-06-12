@@ -1,4 +1,5 @@
 pub mod args;
+pub mod attribute;
 pub mod key_bindings;
 pub mod plugin;
 pub mod plugins;

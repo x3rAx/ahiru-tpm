@@ -1,10 +1,29 @@
-spec      = _{ SOI ~ url ~ ("#" ~ branch)? ~ EOI }
-url       = _{ full_url | short_url }
-full_url  =  { "http" ~ "s"? ~ "://" ~ ((!"/" ~ ANY)+ ~ "/")+ ~ repo ~ ".git"? }
-short_url =  { user ~ "/" ~ repo }
+WHITESPACE = _{ " " | "\t" }
+
+spec      = _{ SOI ~ url ~ attributes? ~ EOI }
+url       = ${ (full_url | short_url) ~ ("#" ~ branch)? }
+full_url  = ${ "http" ~ "s"? ~ "://" ~ ((!"/" ~ ANY)+ ~ "/")+ ~ repo ~ ".git"? }
+short_url = ${ user ~ "/" ~ repo }
 
 user   = @{ ident }
 repo   = @{ ident }
 branch = @{ ident ~ ("/" ~ ident)? }
 
+attributes = _{ (";" ~ attribute)+ }
+attribute  =  { attr_key ~ "=" ~ attr_val ~ WHITESPACE* }
+attr_key   =  { ident }
+attr_val   = @{ quoted_string | (WHITESPACE* ~ ("\\;" | (!(";" | WHITESPACE) ~ ANY)))+ }
+
 ident = _{ (ASCII_ALPHA | ASCII_DIGIT | "_" | "-")+ }
+
+// 
+// --- Quoted String ----------------------------------------------------------
+// 
+quoted_string = { SOI ~ PUSH("\"" | "'") ~ quoted_inner ~ POP ~ EOI }
+
+// This allows to escape double quote characters when inside a double-quoted
+// string but does not allow escaping single quote characters inside a
+// single-quoted string.
+// To also allow escaping single quotes inside single-quoted strings, replace
+// `("\\\"")` with `("\\" ~ PEEK)`.
+quoted_inner = { (("\\\"") | (!PEEK ~ ANY))* }
