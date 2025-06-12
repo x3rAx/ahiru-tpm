@@ -1,7 +1,7 @@
 <div align="center">
     <figure>
         <img src=".res/duck_using_tmux_chatgpt.png"
-            alt="A duck using tmux (generated with ChatGPT)" width="300">
+            alt="A duck using tmux (generated with ChatGPT)" width="500">
         <figcaption>
             <i>
                 Meet <b>Ahiru</b> 🦆<br />
