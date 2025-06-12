@@ -100,7 +100,8 @@ and through home-manager:
     };
 
     ahiru-tpm = {
-      url = "gitlab:x3ro/ahiru-tpm";
+      # Use the GitHub mirror here because using the Codeberg url fails for some reason
+      url = "github:x3ro/ahiru-tpm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -139,13 +140,14 @@ and through home-manager:
 
 </details>
 
-In essence, add `gitlab:x3ro/ahiru-tpm` to your inputs:
+In essence, add `github:x3ro/ahiru-tpm` to your inputs:
 
 ```nix
 {
   inputs = {
     ahiru-tpm = {
-      url = "gitlab:x3ro/ahiru-tpm";
+      # Use the GitHub mirror here because using the Codeberg url fails for some reason
+      url = "github:x3ro/ahiru-tpm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -172,7 +174,7 @@ rustup update
 Clone the repository:
 
 ```sh
-git clone https://gitlab.com/x3ro/ahiru-tpm.git
+git clone https://codeberg.org/x3ro/ahiru-tpm.git
 cd ahiru-tpm
 ```
 
