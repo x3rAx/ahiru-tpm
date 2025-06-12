@@ -1,3 +1,8 @@
+# Required secret:
+# - CODEBERG_TOKEN  - The Codeberg API token used to post new issues
+# - MY_GITHUB_TOKEN - The GitHub API token used to post the comment with the
+#                     Codeberg issue link
+
 name: Post New Issues to Codeberg
 
 on:
