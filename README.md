@@ -26,6 +26,7 @@ Sutic](https://github.com/bruno-) for maintaining the list)
 
 <!-- toc -->
 
+- [Official Mirrors](#official-mirrors)
 - [Installation](#installation)
     * [Nix Flakes](#nix-flakes)
     * [Build from source](#build-from-source)
@@ -43,6 +44,11 @@ Sutic](https://github.com/bruno-) for maintaining the list)
 - [License](#license)
 
 <!-- tocstop -->
+
+## Official Mirrors
+
+- **Codeberg: [x3ro/ahiru-tpm](https://codeberg.org/x3ro/ahiru-tpm)**
+- GitHub: [x3rAx/ahiru-tpm](https://github.com/x3rAx/ahiru-tpm) (mirror)
 
 ## Installation
 
