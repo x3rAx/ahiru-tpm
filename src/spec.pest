@@ -1,6 +1,6 @@
 WHITESPACE = _{ " " | "\t" }
 
-spec      = _{ SOI ~ url ~ attributes? ~ EOI }
+spec      = _{ SOI ~ url ~ (";" ~ attributes)? ~ EOI }
 url       = ${ (short_url | alias_url | full_url) ~ ("#" ~ branch)? }
 short_url = ${ user ~ "/" ~ repo }
 full_url  = ${ ((!"/" ~ ANY)+ ~ "/")+ ~ repo ~ ".git"? }
@@ -16,17 +16,19 @@ user   = @{ ident }
 repo   = @{ ident }
 branch = @{ ident ~ ("/" ~ ident)? }
 
-attributes = _{ (";" ~ attribute)+ }
-attribute  =  { attr_key ~ "=" ~ attr_val ~ WHITESPACE* }
-attr_key   =  { ident }
-attr_val   = @{ quoted_string | (WHITESPACE* ~ ("\\;" | (!(";" | WHITESPACE) ~ ANY)))+ }
+attributes   = _{ attribute ~ (attr_sep ~ attribute)? }
+attribute    =  { attr_key ~ "=" ~ attr_val ~ WHITESPACE* }
+attr_sep     = _{ ";" }
+attr_key     =  { ident }
+attr_val     = ${ quoted_string | unquoted_val }
+unquoted_val =  { (("\\" ~ attr_sep) | (!(attr_sep | WHITESPACE) ~ ANY))+ }
 
 ident = _{ (ASCII_ALPHA | ASCII_DIGIT | "_" | "-")+ }
 
 // 
 // --- Quoted String ----------------------------------------------------------
 // 
-quoted_string = { SOI ~ PUSH("\"" | "'") ~ quoted_inner ~ POP ~ EOI }
+quoted_string = ${ PUSH("\"" | "'") ~ quoted_inner ~ POP }
 
 // This allows to escape double quote characters when inside a double-quoted
 // string but does not allow escaping single quote characters inside a
