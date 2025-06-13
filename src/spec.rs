@@ -73,110 +73,146 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
     let mut builder = SpecBuilder::default();
 
     for pair in SpecParser::parse(Rule::spec, value)? {
-        match pair.as_rule() {
-            Rule::url => {
-                for pair in pair.into_inner() {
-                    match pair.as_rule() {
-                        Rule::short_url => {
-                            builder.url(RepoUrl::Short(pair.as_str().to_string()));
-                            builder.name(
-                                pair.into_inner()
-                                    .find(|x| x.as_rule() == Rule::repo)
-                                    .context("`short_url` should contain `repo`")?
-                                    .as_str()
-                                    .to_string(),
-                            );
-                        }
-                        Rule::alias_url => {
-                            let mut inner = pair.into_inner();
-                            let prefix = inner
-                                .find(|p| p.as_rule() == Rule::prefix)
-                                .context("`alias_url` should contain `prefix`")?
-                                .into_inner()
-                                .next()
-                                .context("`prefix` should have a child")?;
-                            let url_alias = match prefix.as_rule() {
-                                Rule::prefix_codeberg => UrlAlias::Codeberg,
-                                Rule::prefix_github => UrlAlias::GitHub,
-                                Rule::prefix_gitlab => UrlAlias::GitLab,
-                                Rule::prefix_bitbucket => UrlAlias::BitBucket,
-
-                                _ => {
-                                    error!(
-                                        "Unexpected rule in `alias_url`: {:?}",
-                                        prefix.as_rule()
-                                    );
-                                    unreachable!();
-                                }
-                            };
-                            let short_url = inner
-                                .find(|p| p.as_rule() == Rule::short_url)
-                                .context("`alias_url` should contain `short_url`")?;
-                            builder.url(RepoUrl::Alias(url_alias, short_url.as_str().to_string()));
-                            builder.name(
-                                short_url
-                                    .into_inner()
-                                    .find(|x| x.as_rule() == Rule::repo)
-                                    .context("`short_url` should contain `repo`")?
-                                    .as_str()
-                                    .to_string(),
-                            );
-                        }
-                        Rule::full_url => {
-                            builder.url(RepoUrl::Full(pair.as_str().to_string()));
-                            builder.name(
-                                pair.into_inner()
-                                    .find(|x| x.as_rule() == Rule::repo)
-                                    .context("`full_url` should contain `repo`")?
-                                    .as_str()
-                                    .to_string(),
-                            );
-                        }
-                        Rule::branch => {
-                            builder.branch(pair.as_str().to_string());
-                        }
-
-                        _ => {
-                            error!("Unexpected rule in `url`: {:#?}", pair.as_rule());
-                            unreachable!();
-                        }
-                    }
-                }
-            }
-
-            Rule::attribute => parse_attribute(&mut builder, pair.into_inner())
-                .context("Failed to parse attribute")?,
-
-            Rule::EOI => break,
-
-            Rule::WHITESPACE
-            | Rule::spec
-            | Rule::short_url
-            | Rule::alias_url
-            | Rule::prefix
-            | Rule::prefix_codeberg
-            | Rule::prefix_github
-            | Rule::prefix_gitlab
-            | Rule::prefix_bitbucket
-            | Rule::full_url
-            | Rule::branch
-            | Rule::user
-            | Rule::repo
-            | Rule::ident
-            | Rule::attributes
-            | Rule::attr_key
-            | Rule::attr_val
-            | Rule::quoted_string
-            | Rule::quoted_inner => {
-                error!("Unexpected rule: {:#?}", pair.as_rule());
-                unreachable!();
-            }
-        };
+        parse_spec_pair(&mut builder, pair)?;
     }
 
     builder
         .build()
         .context(format!("Building plugin spec from: {value}"))
+}
+
+fn parse_spec_pair(builder: &mut SpecBuilder, pair: pest::iterators::Pair<'_, Rule>) -> Result<()> {
+    match pair.as_rule() {
+        Rule::url => {
+            parse_url(builder, pair)?;
+        }
+
+        Rule::attribute => {
+            parse_attribute(builder, pair.into_inner()).context("Failed to parse attribute")?;
+        }
+
+        Rule::EOI => return Ok(()),
+
+        Rule::WHITESPACE
+        | Rule::spec
+        | Rule::short_url
+        | Rule::alias_url
+        | Rule::prefix
+        | Rule::prefix_codeberg
+        | Rule::prefix_github
+        | Rule::prefix_gitlab
+        | Rule::prefix_bitbucket
+        | Rule::full_url
+        | Rule::branch
+        | Rule::user
+        | Rule::repo
+        | Rule::ident
+        | Rule::attributes
+        | Rule::attr_key
+        | Rule::attr_val
+        | Rule::quoted_string
+        | Rule::quoted_inner => {
+            error!("Unexpected rule: {:#?}", pair.as_rule());
+            unreachable!();
+        }
+    };
+    Ok(())
+}
+
+fn parse_url(
+    builder: &mut SpecBuilder,
+    pair: pest::iterators::Pair<'_, Rule>,
+) -> Result<(), anyhow::Error> {
+    for pair in pair.into_inner() {
+        match pair.as_rule() {
+            Rule::short_url => {
+                parse_short_url(builder, pair)?;
+            }
+            Rule::alias_url => {
+                parse_alias_url(builder, pair)?;
+            }
+            Rule::full_url => {
+                parse_full_url(builder, pair)?;
+            }
+            Rule::branch => {
+                builder.branch(pair.as_str().to_string());
+            }
+
+            _ => {
+                error!("Unexpected rule in `url`: {:#?}", pair.as_rule());
+                unreachable!();
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn parse_short_url(
+    builder: &mut SpecBuilder,
+    pair: pest::iterators::Pair<'_, Rule>,
+) -> Result<(), anyhow::Error> {
+    builder.url(RepoUrl::Short(pair.as_str().to_string()));
+    builder.name(
+        pair.into_inner()
+            .find(|x| x.as_rule() == Rule::repo)
+            .context("`short_url` should contain `repo`")?
+            .as_str()
+            .to_string(),
+    );
+    Ok(())
+}
+
+fn parse_alias_url(
+    builder: &mut SpecBuilder,
+    pair: pest::iterators::Pair<'_, Rule>,
+) -> Result<(), anyhow::Error> {
+    let mut inner = pair.into_inner();
+    let prefix = inner
+        .find(|p| p.as_rule() == Rule::prefix)
+        .context("`alias_url` should contain `prefix`")?
+        .into_inner()
+        .next()
+        .context("`prefix` should have a child")?;
+    let url_alias = match prefix.as_rule() {
+        Rule::prefix_codeberg => UrlAlias::Codeberg,
+        Rule::prefix_github => UrlAlias::GitHub,
+        Rule::prefix_gitlab => UrlAlias::GitLab,
+        Rule::prefix_bitbucket => UrlAlias::BitBucket,
+
+        _ => {
+            error!("Unexpected rule in `alias_url`: {:?}", prefix.as_rule());
+            unreachable!();
+        }
+    };
+    let short_url = inner
+        .find(|p| p.as_rule() == Rule::short_url)
+        .context("`alias_url` should contain `short_url`")?;
+    builder.url(RepoUrl::Alias(url_alias, short_url.as_str().to_string()));
+    builder.name(
+        short_url
+            .into_inner()
+            .find(|x| x.as_rule() == Rule::repo)
+            .context("`short_url` should contain `repo`")?
+            .as_str()
+            .to_string(),
+    );
+    Ok(())
+}
+
+fn parse_full_url(
+    builder: &mut SpecBuilder,
+    pair: pest::iterators::Pair<'_, Rule>,
+) -> Result<(), anyhow::Error> {
+    builder.url(RepoUrl::Full(pair.as_str().to_string()));
+    builder.name(
+        pair.into_inner()
+            .find(|x| x.as_rule() == Rule::repo)
+            .context("`full_url` should contain `repo`")?
+            .as_str()
+            .to_string(),
+    );
+    Ok(())
 }
 
 fn parse_attribute(builder: &mut SpecBuilder, mut attribute_pairs: Pairs<'_, Rule>) -> Result<()> {
