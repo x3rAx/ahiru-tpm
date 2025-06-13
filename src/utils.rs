@@ -37,3 +37,11 @@ pub fn ensure_unique<T: Eq + Hash + Clone>(items: Vec<T>) -> Result<Vec<T>, T> {
 
     Ok(output)
 }
+
+pub fn parse_bool(value: &str) -> Option<bool> {
+    match value {
+        "true" | "yes" | "y" | "on" | "1" => Some(true),
+        "false" | "no" | "n" | "off" | "0" => Some(false),
+        _ => None,
+    }
+}
