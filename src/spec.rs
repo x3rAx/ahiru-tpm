@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use anyhow::{Result, anyhow};
+use anyhow::{Context, Result, anyhow};
+use derive_builder::Builder;
 use getset::Getters;
 use log::{error, warn};
 use pest::{Parser, iterators::Pairs};
@@ -11,7 +12,7 @@ use crate::{
     repo_url::{RepoUrl, UrlAlias},
 };
 
-#[derive(Debug, Getters, PartialEq, Clone)]
+#[derive(Builder, Debug, Getters, PartialEq, Clone)]
 pub struct Spec {
     #[getset(get = "pub")]
     name: String,
@@ -19,9 +20,11 @@ pub struct Spec {
     #[getset(get = "pub")]
     url: RepoUrl,
 
+    #[builder(default, setter(strip_option))]
     branch: Option<String>,
 
     #[getset(get = "pub")]
+    #[builder(default, setter(each = "attribute"))]
     attributes: HashMap<Attribute, String>,
 }
 
@@ -67,10 +70,7 @@ impl TryFrom<String> for Spec {
 }
 
 fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
-    let mut name = None;
-    let mut url = None;
-    let mut branch = None;
-    let mut attributes: HashMap<Attribute, String> = HashMap::new();
+    let mut builder = SpecBuilder::default();
 
     for pair in SpecParser::parse(Rule::spec, value)? {
         match pair.as_rule() {
@@ -78,20 +78,23 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
                 for pair in pair.into_inner() {
                     match pair.as_rule() {
                         Rule::short_url => {
-                            url = Some(RepoUrl::Short(pair.as_str().to_string()));
-                            name = pair
-                                .into_inner()
-                                .find(|x| x.as_rule() == Rule::repo)
-                                .map(|r| r.as_str().to_string());
+                            builder.url(RepoUrl::Short(pair.as_str().to_string()));
+                            builder.name(
+                                pair.into_inner()
+                                    .find(|x| x.as_rule() == Rule::repo)
+                                    .context("`short_url` should contain `repo`")?
+                                    .as_str()
+                                    .to_string(),
+                            );
                         }
                         Rule::alias_url => {
                             let mut inner = pair.into_inner();
                             let prefix = inner
                                 .find(|p| p.as_rule() == Rule::prefix)
-                                .expect("`alias_url` should contain `prefix`")
+                                .context("`alias_url` should contain `prefix`")?
                                 .into_inner()
                                 .next()
-                                .expect("`prefix` should have a child");
+                                .context("`prefix` should have a child")?;
                             let url_alias = match prefix.as_rule() {
                                 Rule::prefix_codeberg => UrlAlias::Codeberg,
                                 Rule::prefix_github => UrlAlias::GitHub,
@@ -108,21 +111,30 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
                             };
                             let short_url = inner
                                 .find(|p| p.as_rule() == Rule::short_url)
-                                .expect("`alias_url` should contain `short_url`");
-                            url = Some(RepoUrl::Alias(url_alias, short_url.as_str().to_string()));
-                            name = short_url
-                                .into_inner()
-                                .find(|x| x.as_rule() == Rule::repo)
-                                .map(|r| r.as_str().to_string());
+                                .context("`alias_url` should contain `short_url`")?;
+                            builder.url(RepoUrl::Alias(url_alias, short_url.as_str().to_string()));
+                            builder.name(
+                                short_url
+                                    .into_inner()
+                                    .find(|x| x.as_rule() == Rule::repo)
+                                    .context("`short_url` should contain `repo`")?
+                                    .as_str()
+                                    .to_string(),
+                            );
                         }
                         Rule::full_url => {
-                            url = Some(RepoUrl::Full(pair.as_str().to_string()));
-                            name = pair
-                                .into_inner()
-                                .find(|x| x.as_rule() == Rule::repo)
-                                .map(|r| r.as_str().to_string());
+                            builder.url(RepoUrl::Full(pair.as_str().to_string()));
+                            builder.name(
+                                pair.into_inner()
+                                    .find(|x| x.as_rule() == Rule::repo)
+                                    .context("`full_url` should contain `repo`")?
+                                    .as_str()
+                                    .to_string(),
+                            );
                         }
-                        Rule::branch => branch = Some(pair.as_str().to_string()),
+                        Rule::branch => {
+                            builder.branch(pair.as_str().to_string());
+                        }
 
                         _ => {
                             error!("Unexpected rule in `url`: {:#?}", pair.as_rule());
@@ -132,7 +144,8 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
                 }
             }
 
-            Rule::attribute => parse_attribute(&mut attributes, pair.into_inner()),
+            Rule::attribute => parse_attribute(&mut builder, pair.into_inner())
+                .context("Failed to parse attribute")?,
 
             Rule::EOI => break,
 
@@ -161,34 +174,30 @@ fn parse_spec(value: &str) -> std::result::Result<Spec, anyhow::Error> {
         };
     }
 
-    Ok(Spec {
-        name: name.ok_or_else(|| anyhow!("Failed to get plugin name from spec: {value}"))?,
-        url: url.ok_or_else(|| anyhow!("Failed to get plugin url from spec: {value}"))?,
-        branch,
-        attributes,
-    })
+    builder
+        .build()
+        .context(format!("Building plugin spec from: {value}"))
 }
 
-fn parse_attribute(
-    attributes: &mut HashMap<Attribute, String>,
-    mut attribute_pairs: Pairs<'_, Rule>,
-) {
+fn parse_attribute(builder: &mut SpecBuilder, mut attribute_pairs: Pairs<'_, Rule>) -> Result<()> {
     let key = attribute_pairs
         .find(|p| p.as_rule() == Rule::attr_key)
-        .expect("Attribute pairs should have an attribute key")
+        .context("Attribute pairs should have an attribute key")?
         .as_str()
         .to_owned();
     let val = attribute_pairs
         .find(|p| p.as_rule() == Rule::attr_val)
-        .expect("Attribute pairs should have an attribute value")
+        .context("Attribute pairs should have an attribute value")?
         .as_str()
         .to_owned();
 
     if let Ok(key) = Attribute::try_from(key.as_ref()) {
-        attributes.insert(key, val);
+        builder.attribute((key, val));
     } else {
         warn!("Invalid attribute name: {key}");
     }
+
+    Ok(())
 }
 
 #[cfg(test)]

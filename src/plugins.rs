@@ -44,7 +44,7 @@ pub fn load_specs() -> Result<Vec<Spec>> {
 fn get_specs_from_config(path: &Path) -> Result<Vec<Spec>> {
     let it = tmux_config_parser::parse(path)
         .context(format!(
-            "Failed to load specs from config file: {}",
+            "Failed to parse specs from config file: {}",
             path.display()
         ))?
         .into_iter()
