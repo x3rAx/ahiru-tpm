@@ -110,10 +110,12 @@ fn parse_spec_pair(builder: &mut SpecBuilder, pair: pest::iterators::Pair<'_, Ru
         | Rule::repo
         | Rule::ident
         | Rule::attributes
+        | Rule::attr_sep
         | Rule::attr_key
         | Rule::attr_val
         | Rule::quoted_string
-        | Rule::quoted_inner => {
+        | Rule::quoted_inner
+        | Rule::unquoted_val => {
             error!("Unexpected rule: {:#?}", pair.as_rule());
             unreachable!();
         }
@@ -223,11 +225,24 @@ fn parse_attribute(builder: &mut SpecBuilder, mut attribute_pairs: Pairs<'_, Rul
         .context("Attribute pairs should have an attribute key")?
         .as_str()
         .to_owned();
-    let val = attribute_pairs
+
+    let val_pair = attribute_pairs
         .find(|p| p.as_rule() == Rule::attr_val)
         .context("Attribute pairs should have an attribute value")?
-        .as_str()
-        .to_owned();
+        .into_inner()
+        .next()
+        .context("`attr_val` should have a child")?;
+
+    let val = match val_pair.as_rule() {
+        Rule::unquoted_val => val_pair.as_str().to_owned(),
+        Rule::quoted_string => val_pair
+            .into_inner()
+            .next()
+            .context("`quoted_string` should have a child")?
+            .as_str()
+            .to_owned(),
+        _ => unreachable!(),
+    };
 
     if let Ok(key) = Attribute::try_from(key.as_ref()) {
         builder.attribute((key, val));
