@@ -3,7 +3,7 @@ use std::{fmt::Display, path::PathBuf};
 use once_cell::sync::OnceCell;
 use url::Url;
 
-use crate::{attribute::Attribute, repo_url::RepoUrl, spec::Spec, tmux};
+use crate::{attribute::Attribute, plugins, repo_url::RepoUrl, spec::Spec, tmux, utils};
 
 pub struct Plugin {
     spec: Spec,
@@ -39,6 +39,14 @@ impl Plugin {
 
     pub fn branch(&self) -> Option<&str> {
         self.spec.branch()
+    }
+
+    pub fn parallel(&self) -> bool {
+        self.spec
+            .attributes()
+            .get(&Attribute::Parallel)
+            .and_then(|s| utils::parse_bool(s))
+            .unwrap_or_else(plugins::do_parallel)
     }
 }
 

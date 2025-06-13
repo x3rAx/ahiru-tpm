@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow};
+use cached::proc_macro::cached;
 use cmd_lib::run_cmd;
 use glob::glob;
 use is_executable::IsExecutable;
@@ -63,7 +64,7 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
         .unwrap_or("".to_owned())
         .split(' ')
         .filter(|&spec| !spec.is_empty())
-        .map(Spec::try_from_url)
+        .map(Spec::try_from_legacy)
         .map_ok(Plugin::from)
         .collect::<Result<_>>()?;
 
@@ -124,12 +125,11 @@ fn install_plugin(plugin: &Plugin) -> Result<()> {
 
 pub fn load() -> Result<()> {
     tmux::setup_keymaps()?;
+    let plugins = get_plugins()?;
+    let (parallel, non_parallel) = plugins.into_iter().partition::<Vec<_>, _>(|p| p.parallel());
 
-    if do_parallel() {
-        get_plugins()?.par_iter().try_for_each(load_plugin)
-    } else {
-        get_plugins()?.iter().try_for_each(load_plugin)
-    }
+    non_parallel.iter().try_for_each(load_plugin)?;
+    parallel.par_iter().try_for_each(load_plugin)
 }
 
 fn load_plugin(plugin: &Plugin) -> Result<()> {
@@ -254,6 +254,7 @@ pub fn clean() -> Result<()> {
     Ok(())
 }
 
+#[cached]
 pub fn do_parallel() -> bool {
     let default = true;
 

@@ -4,4 +4,7 @@ use strum::{Display, EnumString};
 pub enum Attribute {
     #[strum(serialize = "alias")]
     Alias,
+
+    #[strum(serialize = "parallel")]
+    Parallel,
 }
