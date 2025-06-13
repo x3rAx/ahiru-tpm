@@ -29,13 +29,15 @@ pub struct Spec {
 }
 
 impl Spec {
-    pub fn try_from_url(value: &str) -> Result<Spec> {
+    pub fn try_from_legacy(value: &str) -> Result<Spec> {
         if value.contains(';') {
             Err(anyhow!(
                 "Attributes are not supported in legacy plugin definition using `@tpm_plugins`"
             )
             .context(format!("Failed to parse: {value}")))
         } else {
+            // Force non-parallel loading for legacy plugins
+            let value = value.to_owned() + "; parallel=false";
             Spec::try_from(value)
         }
     }
