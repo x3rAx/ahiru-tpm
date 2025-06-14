@@ -20,6 +20,6 @@ pkgs.mkShell {
 
     #openssl.dev
     #pkgconfig # Required to find openssl
+    #lldb # Install lldb with `lldb-dap` (aka `lldb-vscode`)
   ];
 }
-
