@@ -225,8 +225,14 @@ Where `<plugin-spec>` is described below:
 
 #### Plugin Spec
 
-Plugins can be installed from everywhere by pasting their full URL. There are
-however some shortcuts possible:
+The general syntax for the plugin specs is:
+
+```text
+<git-repo-url>[#branch][; attribute1 = value1[[, attributeN = valueN]...]]
+```
+
+Plugins can be installed from everywhere by pasting their full git-repo URL.
+There are however some shortcuts possible:
 
 | Example               | Description                                         |
 | --------------------- | --------------------------------------------------- |
