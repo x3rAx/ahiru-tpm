@@ -1,17 +1,31 @@
 use anyhow::{Context, Result};
 use cmd_lib::run_cmd;
-use rayon::prelude::*;
+use futures::{StreamExt, stream::FuturesUnordered};
+use tokio::task;
 
 use crate::{plugin::Plugin, tmux::ensure_plugins_dir_exists};
 
-pub fn install() -> Result<()> {
+pub async fn install() -> Result<()> {
     if super::do_parallel() {
-        super::get_plugins()?
-            .par_iter()
-            .try_for_each(install_plugin)
+        install_parallel().await
     } else {
         super::get_plugins()?.iter().try_for_each(install_plugin)
     }
+}
+
+async fn install_parallel() -> Result<()> {
+    let mut tasks = FuturesUnordered::new();
+    let plugins = super::get_plugins()?;
+
+    for plugin in plugins {
+        tasks.push(task::spawn(async move { install_plugin(&plugin) }));
+    }
+
+    while let Some(result) = tasks.next().await {
+        result.context("Task paniced!")?.context("Task failed")?;
+    }
+
+    Ok(())
 }
 
 fn install_plugin(plugin: &Plugin) -> Result<()> {
