@@ -205,13 +205,15 @@ cargo install --locked --path .
 
 ### Installing Plugins
 
-Plugins can be installed by adding them to to the tmux config and running
+Plugins can be installed by first adding them to to the tmux config and then
+using the [install key-binding](#key-bindings) or by running:
 
 ```sh
 ahiru-tpm install
 ```
 
-No need to reload tmux config first.
+No need to reload tmux config first. **Ahiru-TPM** parses the tmux config by
+itself to detect changes.
 
 To add a plugin, add the following line to your tmux config:
 
@@ -283,7 +285,7 @@ Below is a list of possible attributes:
 
 ### Updating Plugins
 
-To update plugins run:
+To update plugins run use the [update key-binding](#key-bindings) or run:
 
 ```sh
 ahiru-tpm update
@@ -292,7 +294,7 @@ ahiru-tpm update
 ### Uninstalling Plugins
 
 To uninstall plugins, first remove them from your tmux config. Then, to clean
-up downloaded plugins, run:
+up downloaded plugins, use the [clean key-binding](#key-bindings) or run:
 
 ```sh
 ahiru-tpm clean
