@@ -1,10 +1,8 @@
 pub mod install;
 pub mod load;
+pub mod update;
 
-use std::{
-    collections::{HashMap, HashSet},
-    path::Path,
-};
+use std::{collections::HashSet, path::Path};
 
 use anyhow::{Context, Result, anyhow};
 use cached::proc_macro::cached;
@@ -12,10 +10,8 @@ use cmd_lib::run_cmd;
 use glob::glob;
 use itertools::Itertools;
 use log::warn;
-use rayon::prelude::*;
 
 use crate::{
-    args::UpdateArgs,
     plugin::Plugin,
     spec::Spec,
     tmux::{self},
@@ -84,79 +80,6 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
     Ok(plugins)
 }
 
-pub fn update_cmd(args: UpdateArgs) -> Result<()> {
-    if args.all {
-        update_all()?;
-    } else {
-        update_list(&args.names)?;
-    }
-
-    if args.load {
-        load::load_cmd()?;
-    }
-
-    println!("==> Done updating plugins.");
-    if args.load {
-        println!("==> Plugins have been reloaded.");
-    }
-
-    Ok(())
-}
-
-fn update_all() -> Result<()> {
-    let plugins: Vec<Plugin> = get_plugins()?
-        .into_iter()
-        .filter(|plugin| plugin.is_installed())
-        .collect();
-
-    if do_parallel() {
-        plugins.par_iter().try_for_each(update_plugin)
-    } else {
-        plugins.iter().try_for_each(update_plugin)
-    }
-}
-
-fn update_list<T: AsRef<str>>(names: &[T]) -> Result<()> {
-    let plugin_map: HashMap<_, _> = get_plugins()?
-        .into_iter()
-        .map(|plugin| (plugin.name().to_owned(), plugin))
-        .collect();
-
-    let plugins = names
-        .iter()
-        .map(|name| {
-            let name = name.as_ref();
-            plugin_map
-                .get(name)
-                .context(format!("Unknown plugin name: {}", name))
-        })
-        .collect::<Result<Vec<_>>>()?;
-
-    if do_parallel() {
-        plugins
-            .par_iter()
-            .try_for_each(|plugin| update_plugin(plugin))
-    } else {
-        plugins.iter().try_for_each(|plugin| update_plugin(plugin))
-    }
-}
-
-fn update_plugin(plugin: &Plugin) -> Result<()> {
-    if !plugin.is_installed() {
-        return Err(anyhow!(r#"Plugin "{}" is not installed"#, plugin.name()));
-    }
-
-    let path = plugin.path();
-
-    run_cmd!(
-        cd $path;
-        GIT_TERMINAL_PROMPT=0 git pull --rebase;
-        GIT_TERMINAL_PROMPT=0 git submodule update --init --recursive;
-
-    )
-    .context(format!(r#"Failed to update plugin "{}""#, plugin.name()))
-}
-
 pub fn clean_cmd() -> Result<()> {
     clean()?;
 
@@ -206,7 +129,7 @@ pub fn sync_cmd() -> Result<()> {
 pub fn sync() -> Result<()> {
     install::install()?;
     clean_cmd()?;
-    update_all()?;
+    update::update_all()?;
     Ok(())
 }
 
