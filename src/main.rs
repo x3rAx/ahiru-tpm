@@ -16,7 +16,7 @@ fn main() -> Result<()> {
     match args.action {
         Action::Install(install_arga) => plugins::install::install_cmd(install_arga),
         Action::Update(update_args) => plugins::update_cmd(update_args),
-        Action::Load => plugins::load_cmd(),
+        Action::Load => plugins::load::load_cmd(),
         Action::Clean => plugins::clean_cmd(),
         Action::Sync => plugins::sync_cmd(),
     }

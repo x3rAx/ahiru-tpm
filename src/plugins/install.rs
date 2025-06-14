@@ -8,7 +8,7 @@ pub fn install_cmd(args: InstallArgs) -> Result<()> {
     install()?;
 
     if args.load {
-        super::load_cmd()?;
+        super::load::load_cmd()?;
     }
 
     println!();
