@@ -1,3 +1,5 @@
+pub mod install;
+
 use std::{
     collections::{HashMap, HashSet},
     path::Path,
@@ -13,10 +15,10 @@ use log::{info, warn};
 use rayon::prelude::*;
 
 use crate::{
-    args::{InstallArgs, UpdateArgs},
+    args::UpdateArgs,
     plugin::Plugin,
     spec::Spec,
-    tmux::{self, ensure_plugins_dir_exists},
+    tmux::{self},
     tmux_config_parser::{self, ConfigDirective},
     utils,
 };
@@ -80,52 +82,6 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
     })?;
 
     Ok(plugins)
-}
-
-pub fn install_cmd(args: InstallArgs) -> Result<()> {
-    install()?;
-
-    if args.load {
-        load_cmd()?;
-    }
-
-    println!();
-    println!("==> Done installing plugins.");
-    if args.load {
-        println!("==> Plugins have been reloaded.");
-    }
-
-    Ok(())
-}
-
-fn install() -> Result<()> {
-    if do_parallel() {
-        get_plugins()?.par_iter().try_for_each(install_plugin)
-    } else {
-        get_plugins()?.iter().try_for_each(install_plugin)
-    }
-}
-
-fn install_plugin(plugin: &Plugin) -> Result<()> {
-    if plugin.is_installed() {
-        return Ok(());
-    }
-
-    ensure_plugins_dir_exists()?;
-
-    let url = plugin.url();
-    let path = plugin.path();
-
-    let branch_args = match plugin.branch() {
-        Some(branch) => vec!["--branch", branch],
-        None => vec![],
-    };
-
-    println!("Installing plugin {}", plugin);
-    run_cmd!(
-        GIT_TERMINAL_PROMPT=0 git clone --single-branch --recursive $[branch_args] $url $path;
-    )
-    .context(format!(r#"Failed to install plugin "{}""#, plugin.name()))
 }
 
 pub fn load_cmd() -> Result<()> {
@@ -287,7 +243,7 @@ pub fn sync_cmd() -> Result<()> {
 }
 
 pub fn sync() -> Result<()> {
-    install()?;
+    install::install()?;
     clean_cmd()?;
     update_all()?;
     Ok(())
