@@ -4,26 +4,7 @@ use anyhow::{Context, Result, anyhow};
 use cmd_lib::run_cmd;
 use rayon::prelude::*;
 
-use crate::{args::UpdateArgs, plugin::Plugin};
-
-pub fn update_cmd(args: UpdateArgs) -> Result<()> {
-    if args.all {
-        update_all()?;
-    } else {
-        update_list(&args.names)?;
-    }
-
-    if args.load {
-        super::load::load_cmd()?;
-    }
-
-    println!("==> Done updating plugins.");
-    if args.load {
-        println!("==> Plugins have been reloaded.");
-    }
-
-    Ok(())
-}
+use crate::plugin::Plugin;
 
 pub fn update_all() -> Result<()> {
     let plugins: Vec<Plugin> = super::get_plugins()?
