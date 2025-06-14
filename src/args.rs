@@ -17,6 +17,8 @@ pub enum Action {
     Load,
     /// Clean plugins not listed in tmux config
     Clean,
+    /// Run `install`, `clean` and `update --all` in one go
+    Sync,
 }
 
 #[derive(Parser, Debug)]

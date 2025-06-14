@@ -82,23 +82,28 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
     Ok(plugins)
 }
 
-pub fn install(args: InstallArgs) -> Result<()> {
-    if do_parallel() {
-        get_plugins()?.par_iter().try_for_each(install_plugin)
-    } else {
-        get_plugins()?.iter().try_for_each(install_plugin)
-    }?;
+pub fn install_cmd(args: InstallArgs) -> Result<()> {
+    install()?;
 
     if args.load {
-        load()?;
+        load_cmd()?;
     }
 
+    println!();
     println!("==> Done installing plugins.");
     if args.load {
         println!("==> Plugins have been reloaded.");
     }
 
     Ok(())
+}
+
+fn install() -> Result<()> {
+    if do_parallel() {
+        get_plugins()?.par_iter().try_for_each(install_plugin)
+    } else {
+        get_plugins()?.iter().try_for_each(install_plugin)
+    }
 }
 
 fn install_plugin(plugin: &Plugin) -> Result<()> {
@@ -123,7 +128,15 @@ fn install_plugin(plugin: &Plugin) -> Result<()> {
     .context(format!(r#"Failed to install plugin "{}""#, plugin.name()))
 }
 
-pub fn load() -> Result<()> {
+pub fn load_cmd() -> Result<()> {
+    load()?;
+
+    println!();
+    println!("==> Plugins have been reloaded.");
+    Ok(())
+}
+
+fn load() -> Result<()> {
     tmux::setup_keymaps()?;
     let plugins = get_plugins()?;
     let (parallel, non_parallel) = plugins.into_iter().partition::<Vec<_>, _>(|p| p.parallel());
@@ -154,7 +167,7 @@ fn load_plugin(plugin: &Plugin) -> Result<()> {
     Ok(())
 }
 
-pub fn update(args: UpdateArgs) -> Result<()> {
+pub fn update_cmd(args: UpdateArgs) -> Result<()> {
     if args.all {
         update_all()?;
     } else {
@@ -162,7 +175,7 @@ pub fn update(args: UpdateArgs) -> Result<()> {
     }
 
     if args.load {
-        load()?;
+        load_cmd()?;
     }
 
     println!("==> Done updating plugins.");
@@ -227,6 +240,14 @@ fn update_plugin(plugin: &Plugin) -> Result<()> {
     .context(format!(r#"Failed to update plugin "{}""#, plugin.name()))
 }
 
+pub fn clean_cmd() -> Result<()> {
+    clean()?;
+
+    println!();
+    println!("==> Done cleaning plugins.");
+
+    Ok(())
+}
 pub fn clean() -> Result<()> {
     let plugin_set: HashSet<_> = get_plugins()?
         .into_iter()
@@ -251,6 +272,24 @@ pub fn clean() -> Result<()> {
             run_cmd!(rm -rf $path_str)?
         }
     }
+    Ok(())
+}
+
+pub fn sync_cmd() -> Result<()> {
+    sync()?;
+    load()?;
+
+    println!();
+    println!("==> Done syncing plugins.");
+    println!("==> Plugins have been reloaded.");
+
+    Ok(())
+}
+
+pub fn sync() -> Result<()> {
+    install()?;
+    clean_cmd()?;
+    update_all()?;
     Ok(())
 }
 
