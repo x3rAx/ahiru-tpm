@@ -1,0 +1,40 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Rust Binary",
+            "type": "codelldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/${workspaceFolderBasename}",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "rust: cargo build"
+        },
+        {
+            "name": "Debug with Arguments",
+            "type": "codelldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/${workspaceFolderBasename}",
+            "args": [
+                "${input:program_args}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopOnEntry": false,
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "rust: cargo build"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "program_args",
+            "description": "Program arguments",
+            "default": "",
+            "type": "promptString"
+        }
+    ]
+}
