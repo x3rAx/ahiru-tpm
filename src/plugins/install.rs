@@ -2,23 +2,7 @@ use anyhow::{Context, Result};
 use cmd_lib::run_cmd;
 use rayon::prelude::*;
 
-use crate::{args::InstallArgs, plugin::Plugin, tmux::ensure_plugins_dir_exists};
-
-pub fn install_cmd(args: InstallArgs) -> Result<()> {
-    install()?;
-
-    if args.load {
-        super::load::load_cmd()?;
-    }
-
-    println!();
-    println!("==> Done installing plugins.");
-    if args.load {
-        println!("==> Plugins have been reloaded.");
-    }
-
-    Ok(())
-}
+use crate::{plugin::Plugin, tmux::ensure_plugins_dir_exists};
 
 pub fn install() -> Result<()> {
     if super::do_parallel() {

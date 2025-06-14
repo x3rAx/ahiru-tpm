@@ -6,14 +6,6 @@ use glob::glob;
 
 use crate::tmux::{self};
 
-pub fn clean_cmd() -> Result<()> {
-    clean()?;
-
-    println!();
-    println!("==> Done cleaning plugins.");
-
-    Ok(())
-}
 pub fn clean() -> Result<()> {
     let plugin_set: HashSet<_> = super::get_plugins()?
         .into_iter()
