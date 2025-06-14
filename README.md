@@ -33,6 +33,8 @@ Sutic](https://github.com/bruno-) for maintaining the list)
 - [Usage](#usage)
     * [Installing Plugins](#installing-plugins)
         + [Plugin Spec](#plugin-spec)
+            - [Branch](#branch)
+            - [Attributes](#attributes)
     * [Updating Plugins](#updating-plugins)
     * [Uninstalling Plugins](#uninstalling-plugins)
     * [Settings](#settings)
@@ -77,7 +79,9 @@ your tmux config (either in `~/.tmux.conf` or
     # Other examples:
     # set -g @plugin 'github_username/plugin_name'
     # set -g @plugin 'github_username/plugin_name#branch'
-    # set -g @plugin 'https://gitlab.com:user/plugin'
+    # set -g @plugin 'codeberg:user/plugin_name; alias = desired_name'
+    # set -g @plugin 'https://codeberg.org/user/plugin_name'
+    # set -g @plugin 'git@codeberg.org:user/plugin_name'
 
 # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
 run 'ahiru-tpm init'
@@ -219,13 +223,63 @@ Where `<plugin-spec>` is described below:
 
 #### Plugin Spec
 
-Currently plugins can only be installed from GitHub repositories. The
-following format is used for the `<plugin-spec>`:
+Plugins can be installed from everywhere by pasting their full URL. There are
+however some shortcuts possible:
+
+| Example               | Description                                         |
+| --------------------- | --------------------------------------------------- |
+| `user/repo`           | Short URL [GitHub](https://github.com/) repos       |
+| `codeberg:user/repo`  | Short URL [Codeberg](https://codeberg.org/) repos   |
+| `github:user/repo`    | Short URL [GitHub](https://github.com/) repos       |
+| `gitlab:user/repo`    | Short URL [GitLab](https://gitlab.com/) repos       |
+| `bitbucket:user/repo` | Short URL [BitBucket](https://bitbucket.org/) repos |
+
+##### Branch
+
+You can install a plugin from a specific branch by appending it to the repo
+URL, separated by a `#`:
+
+> [!Note]
+>
+> This works for all URLs, not just for short GitHub URLs
+
+```text
+user/repo#branch
+```
+
+##### Attributes
+
+You can add several attributes to a plugin, that change how it is handled.
+
+Attributes follow after the plugin URL (and branch, if any) from which they are
+separated by a `;`. Multiple attributes are sparated by a `,`. Should you want
+to use spaces in an attribute value, enclose it in quotes. Here are some
+examples:
 
 ```tmux
-github_username/plugin_name
-github_username/plugin_name#branch
+user/repo; attr1 = value1, attr2 = value2
+codeberg:user/repo; attr1 = value1
+user/repo#branch; attr1=value1, attr2=value2
+https:://codeberg.com/user/repo#branch; attr1 = "value with spaces"
 ```
+
+Below is a list of possible attributes:
+
+| Attribute  | Example              | Description                                                                |
+| ---------- | -------------------- | -------------------------------------------------------------------------- |
+| `alias`    | `alias = catppuccin` | Choose a different name for the plugin to prevent collisions.<sup>\*</sup> |
+| `parallel` | `parallel = false`   | Control whether to load this plugin in parallel.<sup>\*\*</sup>            |
+
+> <sup>\*</sup>
+> The plugin name is determined by the repo name, i.e. the part of the repo URL
+> after the last `/`. Some repos might have undesired names (e.g.
+> `catppuccin/tmux`, which would result in the plugin name `tmux`) or names
+> that collide with that of other plugins.
+>
+> <sup>\*\*</sup>
+> This attribute overrides the global `@tpm-parallel` option, so you could
+> disable parallel loading for all plugins and enable it only for specific
+> ones.
 
 ### Updating Plugins
 
