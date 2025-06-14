@@ -37,6 +37,7 @@ Sutic](https://github.com/bruno-) for maintaining the list)
             - [Attributes](#attributes)
     * [Updating Plugins](#updating-plugins)
     * [Uninstalling Plugins](#uninstalling-plugins)
+    * [Sync (Install, Clean and Update)](#sync-install-clean-and-update)
     * [Settings](#settings)
         + [Disable Parallel Mode](#disable-parallel-mode)
     * [Key Bindings](#key-bindings)
@@ -306,6 +307,16 @@ up downloaded plugins, use the [clean key-binding](#key-bindings) or run:
 ahiru-tpm clean
 ```
 
+### Sync (Install, Clean and Update)
+
+To synchronize with your tmux config, (i.e. install new plugins, update
+existing and clean up removed ones) you can use the [sync
+key-binding](#key-bindings) or simply run:
+
+```sh
+ahiru-tpm sync
+```
+
 ### Settings
 
 #### Disable Parallel Mode
@@ -330,6 +341,7 @@ discouraged and we recommend to use these more mnemonic key bindings:
 | `prefix` + `alt + I` | **I**nstall and reload plugins |
 | `prefix` + `alt + U` | **U**pdate and reload plugins  |
 | `prefix` + `alt + C` | **C**lean plugins              |
+| `prefix` + `alt + S` | **S**ync plugins               |
 
 To change the key bindings add the following to your tmux config:
 
@@ -337,6 +349,7 @@ To change the key bindings add the following to your tmux config:
 set -g @tpm-bind-install 'M-I'
 set -g @tpm-bind-update 'M-U'
 set -g @tpm-bind-clean 'M-C'
+set -g @tpm-bind-sync 'M-S'
 ```
 
 > [!Note]
