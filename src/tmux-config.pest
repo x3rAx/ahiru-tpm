@@ -18,13 +18,14 @@ source_file_flags = @{ ("-" ~ (ASCII_ALPHANUMERIC+) ~ WHITESPACE)* }
 // 
 // --- Quoted String ----------------------------------------------------------
 // 
-quoted_string = ${ (single_quoted | double_quoted) }
+quoted_string = { (single_quoted_string | double_quoted_string) }
 
-single_quoted = _{ "'" ~ single_inner ~ "'" }
-single_inner  = @{ (!"'" ~ ANY)* }
+double_quoted_string = ${ PUSH("\"") ~ quoted_inner ~ POP }
+single_quoted_string = ${ PUSH("'") ~ quoted_inner ~ POP }
 
-double_quoted = _{ "\"" ~ double_inner ~ "\"" }
-double_inner  = @{ (escaped_char | normal_char)* }
-
-escaped_char = _{ "\\" ~ ("\"" | "\\") }
-normal_char  = _{ !("\\" | "\"") ~ ANY }
+// This allows to escape double quote characters when inside a double-quoted
+// string but does not allow escaping single quote characters inside a
+// single-quoted string.
+// To also allow escaping single quotes inside single-quoted strings, replace
+// `("\\\"")` with `("\\" ~ PEEK)`.
+quoted_inner = { (("\\\"") | (!PEEK ~ ANY))* }

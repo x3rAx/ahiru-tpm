@@ -114,6 +114,8 @@ fn parse_spec_pair(builder: &mut SpecBuilder, pair: pest::iterators::Pair<'_, Ru
         | Rule::attr_key
         | Rule::attr_val
         | Rule::quoted_string
+        | Rule::single_quoted_string
+        | Rule::double_quoted_string
         | Rule::quoted_inner
         | Rule::unquoted_val => {
             error!("Unexpected rule: {:#?}", pair.as_rule());
@@ -235,12 +237,22 @@ fn parse_attribute(builder: &mut SpecBuilder, mut attribute_pairs: Pairs<'_, Rul
 
     let val = match val_pair.as_rule() {
         Rule::unquoted_val => val_pair.as_str().to_owned(),
-        Rule::quoted_string => val_pair
+
+        Rule::double_quoted_string => val_pair
             .into_inner()
             .next()
-            .context("`quoted_string` should have a child")?
+            .context("`double_quoted_string` should have a child")?
+            .as_str()
+            .to_owned()
+            .replace("\\\"", "\""),
+
+        Rule::single_quoted_string => val_pair
+            .into_inner()
+            .next()
+            .context("`single_quoted_string` should have a child")?
             .as_str()
             .to_owned(),
+
         _ => unreachable!(),
     };
 

@@ -28,7 +28,10 @@ ident = _{ (ASCII_ALPHA | ASCII_DIGIT | "_" | "-")+ }
 // 
 // --- Quoted String ----------------------------------------------------------
 // 
-quoted_string = ${ PUSH("\"" | "'") ~ quoted_inner ~ POP }
+quoted_string = _{ (single_quoted_string | double_quoted_string) }
+
+single_quoted_string = ${ PUSH("\"") ~ quoted_inner ~ POP }
+double_quoted_string = ${ PUSH("'") ~ quoted_inner ~ POP }
 
 // This allows to escape double quote characters when inside a double-quoted
 // string but does not allow escaping single quote characters inside a
