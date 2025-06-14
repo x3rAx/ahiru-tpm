@@ -16,9 +16,9 @@ user   = @{ ident }
 repo   = @{ ident }
 branch = @{ ident ~ ("/" ~ ident)? }
 
+attr_sep     = _{ "," }
 attributes   = _{ attribute ~ (attr_sep ~ attribute)? }
 attribute    =  { attr_key ~ "=" ~ attr_val ~ WHITESPACE* }
-attr_sep     = _{ ";" }
 attr_key     =  { ident }
 attr_val     = ${ quoted_string | unquoted_val }
 unquoted_val =  { (("\\" ~ attr_sep) | (!(attr_sep | WHITESPACE) ~ ANY))+ }
