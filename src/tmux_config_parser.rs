@@ -4,7 +4,6 @@ use std::{
 };
 
 use anyhow::{Context, Result};
-use log::error;
 use pest::{Parser, iterators::Pair};
 use pest_derive::Parser;
 
@@ -45,9 +44,11 @@ mod source_path {
                 Rule::root_dir => target = PathBuf::from("/"),
                 Rule::config_dir => target = PathBuf::from(config_dir),
                 Rule::path => target.push(pair.as_str().trim_start_matches('/')),
+
                 Rule::EOI => (),
-                _ => unreachable!(),
-            };
+
+                Rule::source_path => unreachable!(),
+            }
         }
 
         Ok(target)
@@ -59,7 +60,8 @@ pub fn parse(config: &Path) -> Result<Vec<ConfigDirective>> {
     let config = fs::read_to_string(config)
         .context(format!("Failed reading config file: {}", config.display()))?;
 
-    let pairs = TmuxConfigParser::parse(Rule::config, &config)?;
+    let pairs = TmuxConfigParser::parse(Rule::config, &config)
+        .context(format!("Failed to parse config file: {config}"))?;
 
     let directives: Vec<ConfigDirective> = pairs
         .filter_map(|pair| match pair.as_rule() {
@@ -67,9 +69,20 @@ pub fn parse(config: &Path) -> Result<Vec<ConfigDirective>> {
             Rule::source => Some(parse_source_rule(pair, config_dir)),
 
             Rule::other | Rule::EOI => None,
-            _ => {
-                error!("Unexpected rule: {:?}", pair.as_rule());
-                unreachable!();
+
+            Rule::WHITESPACE
+            | Rule::COMMENT
+            | Rule::config
+            | Rule::directive
+            | Rule::newline
+            | Rule::set_option
+            | Rule::source_file
+            | Rule::source_file_flags
+            | Rule::quoted_string
+            | Rule::double_quoted_string
+            | Rule::single_quoted_string
+            | Rule::quoted_inner => {
+                unreachable!("Unexpected rule: {:?}", pair.as_rule());
             }
         })
         .collect::<Result<_>>()?;
@@ -81,26 +94,55 @@ fn parse_plugin_spec_rule(pair: Pair<'_, Rule>) -> Result<ConfigDirective> {
     let spec = parse_quoted_string(
         pair.into_inner()
             .find(|x| x.as_rule() == Rule::quoted_string)
-            .expect("`quoted_string` should exist inside `plugin_spec`"),
-    );
-    Ok(ConfigDirective::PluginSpec(spec.try_into()?))
+            .context("`quoted_string` should exist inside `plugin_spec`")?,
+    )
+    .context("Failed to parse `quoted_string` of `plugin_spec`")?;
+    Ok(ConfigDirective::PluginSpec(
+        spec.as_str()
+            .try_into()
+            .with_context(|| format!("Failed to parse plugin spec: {spec}"))?,
+    ))
 }
 
 fn parse_source_rule(pair: Pair<'_, Rule>, config_dir: &Path) -> Result<ConfigDirective> {
     let path = parse_quoted_string(
         pair.into_inner()
             .find(|x| x.as_rule() == Rule::quoted_string)
-            .expect("`quoted_string` should exist `inside source`"),
-    );
+            .context("`quoted_string` should exist inside `source`")?,
+    )
+    .context("Failed to parse `quoted_string` of `source`")?;
 
-    let path = source_path::parse(path, config_dir).context("Failed parsing source_path")?;
+    let path = source_path::parse(&path, config_dir)
+        .with_context(|| format!("Failed parsing source_path: {path}"))?;
 
     Ok(ConfigDirective::Source(path.to_owned()))
 }
 
-fn parse_quoted_string(pair: Pair<'_, Rule>) -> &str {
-    pair.into_inner()
-        .find(|x| [Rule::double_inner, Rule::single_inner].contains(&x.as_rule()))
-        .expect("`double_inner` or single_inner should exist inside `quoted_string`")
-        .as_str()
+fn parse_quoted_string(pair: Pair<'_, Rule>) -> Result<String> {
+    let quoted_inner = pair
+        .into_inner()
+        .next()
+        .context("`quoted_string` should have a child")?;
+
+    Ok(match quoted_inner.as_rule() {
+        Rule::double_quoted_string => quoted_inner
+            .into_inner()
+            .next()
+            .context("`double_quoted_string` should have a child")?
+            .as_str()
+            .to_owned()
+            .replace("\\\"", "\""),
+
+        Rule::single_quoted_string => quoted_inner
+            .into_inner()
+            .next()
+            .context("`single_quoted_string` should have a child")?
+            .as_str()
+            .to_owned(),
+
+        _ => unreachable!(
+            "Unexpected rule in `quoted_string`: {:?}",
+            quoted_inner.as_rule()
+        ),
+    })
 }
