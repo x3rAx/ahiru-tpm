@@ -1,13 +1,12 @@
+pub mod clean;
 pub mod install;
 pub mod load;
 pub mod update;
 
-use std::{collections::HashSet, path::Path};
+use std::path::Path;
 
 use anyhow::{Context, Result, anyhow};
 use cached::proc_macro::cached;
-use cmd_lib::run_cmd;
-use glob::glob;
 use itertools::Itertools;
 use log::warn;
 
@@ -80,41 +79,6 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
     Ok(plugins)
 }
 
-pub fn clean_cmd() -> Result<()> {
-    clean()?;
-
-    println!();
-    println!("==> Done cleaning plugins.");
-
-    Ok(())
-}
-pub fn clean() -> Result<()> {
-    let plugin_set: HashSet<_> = get_plugins()?
-        .into_iter()
-        .map(|plugin| {
-            Ok(plugin
-                .path()
-                .to_str()
-                .context("Path is not valid UTF-8")?
-                .to_owned())
-        })
-        .collect::<Result<HashSet<_>>>()?;
-
-    let plugin_dir = tmux::get_plugins_dir();
-    let plugin_dir_str = plugin_dir.to_str().context("Path is not valid UTF-8")?;
-
-    for entry in glob(&format!("{plugin_dir_str}/*"))? {
-        let entry = entry?;
-        let path_str = entry.to_str().context("Path is not valid UTF-8")?;
-
-        if !plugin_set.contains(path_str) {
-            println!("Removing {path_str}");
-            run_cmd!(rm -rf $path_str)?
-        }
-    }
-    Ok(())
-}
-
 pub fn sync_cmd() -> Result<()> {
     sync()?;
     load::load()?;
@@ -128,7 +92,7 @@ pub fn sync_cmd() -> Result<()> {
 
 pub fn sync() -> Result<()> {
     install::install()?;
-    clean_cmd()?;
+    clean::clean_cmd()?;
     update::update_all()?;
     Ok(())
 }
