@@ -18,6 +18,6 @@ fn main() -> Result<()> {
         Action::Update(update_args) => plugins::update::update_cmd(update_args),
         Action::Load => plugins::load::load_cmd(),
         Action::Clean => plugins::clean::clean_cmd(),
-        Action::Sync => plugins::sync_cmd(),
+        Action::Sync => plugins::sync::sync_cmd(),
     }
 }
