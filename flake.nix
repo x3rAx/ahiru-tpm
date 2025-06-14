@@ -1,5 +1,5 @@
 {
-  description = "A Rust Flake";
+  description = "Ahiru-TPM";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
