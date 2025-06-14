@@ -7,14 +7,6 @@ use rayon::prelude::*;
 
 use crate::{plugin::Plugin, tmux};
 
-pub fn load_cmd() -> Result<()> {
-    load()?;
-
-    println!();
-    println!("==> Plugins have been reloaded.");
-    Ok(())
-}
-
 pub fn load() -> Result<()> {
     tmux::setup_keymaps()?;
     let plugins = super::get_plugins()?;

@@ -1,6 +1,6 @@
 use ahiru_tpm::{
     args::{Action, Args},
-    plugins::{self},
+    cmd,
 };
 use anyhow::Result;
 use clap::Parser;
@@ -14,10 +14,10 @@ fn main() -> Result<()> {
         .init();
 
     match args.action {
-        Action::Install(install_arga) => plugins::install::install_cmd(install_arga),
-        Action::Update(update_args) => plugins::update::update_cmd(update_args),
-        Action::Load => plugins::load::load_cmd(),
-        Action::Clean => plugins::clean::clean_cmd(),
-        Action::Sync => plugins::sync::sync_cmd(),
+        Action::Install(install_arga) => cmd::install(install_arga),
+        Action::Update(update_args) => cmd::update(update_args),
+        Action::Load => cmd::load(),
+        Action::Clean => cmd::clean(),
+        Action::Sync => cmd::sync(),
     }
 }
