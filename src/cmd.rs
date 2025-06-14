@@ -5,8 +5,8 @@ use crate::{
     plugins::{clean, install, load, sync, update},
 };
 
-pub fn install(args: InstallArgs) -> Result<()> {
-    install::install()?;
+pub async fn install(args: InstallArgs) -> Result<()> {
+    install::install().await?;
 
     if args.load {
         load()?;
@@ -57,8 +57,8 @@ pub fn clean() -> Result<()> {
     Ok(())
 }
 
-pub fn sync() -> Result<()> {
-    sync::sync()?;
+pub async fn sync() -> Result<()> {
+    sync::sync().await?;
     load::load()?;
 
     println!();

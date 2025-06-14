@@ -5,8 +5,8 @@ use ahiru_tpm::{
 use anyhow::Result;
 use clap::Parser;
 
-//#[cmd_lib::main]
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let args = Args::parse();
 
     env_logger::builder()
@@ -14,10 +14,10 @@ fn main() -> Result<()> {
         .init();
 
     match args.action {
-        Action::Install(install_arga) => cmd::install(install_arga),
+        Action::Install(install_arga) => cmd::install(install_arga).await,
         Action::Update(update_args) => cmd::update(update_args),
         Action::Load => cmd::load(),
         Action::Clean => cmd::clean(),
-        Action::Sync => cmd::sync(),
+        Action::Sync => cmd::sync().await,
     }
 }
