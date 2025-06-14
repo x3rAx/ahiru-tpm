@@ -1,6 +1,7 @@
 pub mod clean;
 pub mod install;
 pub mod load;
+pub mod sync;
 pub mod update;
 
 use std::path::Path;
@@ -77,24 +78,6 @@ pub fn get_plugins() -> Result<Vec<Plugin>> {
     })?;
 
     Ok(plugins)
-}
-
-pub fn sync_cmd() -> Result<()> {
-    sync()?;
-    load::load()?;
-
-    println!();
-    println!("==> Done syncing plugins.");
-    println!("==> Plugins have been reloaded.");
-
-    Ok(())
-}
-
-pub fn sync() -> Result<()> {
-    install::install()?;
-    clean::clean_cmd()?;
-    update::update_all()?;
-    Ok(())
 }
 
 #[cached]
