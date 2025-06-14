@@ -7,6 +7,7 @@ struct KeyBindings {
     install_key: Option<String>,
     update_key: Option<String>,
     clean_key: Option<String>,
+    sync_key: Option<String>,
 }
 
 impl KeyBindings {
@@ -15,6 +16,7 @@ impl KeyBindings {
             install_key: get_option("@tpm-bind-install").or_else(|| get_option("@tpm-install")),
             update_key: get_option("@tpm-bind-update").or_else(|| get_option("@tpm-update")),
             clean_key: get_option("@tpm-bind-clean").or_else(|| get_option("@tpm-clean")),
+            sync_key: get_option("@tpm-bind-sync"),
         }
     }
 }
@@ -31,11 +33,13 @@ pub fn setup() -> Result<()> {
     let install_key = binds.install_key.unwrap_or("M-I".into());
     let update_key = binds.update_key.unwrap_or("M-U".into());
     let clean_key = binds.clean_key.unwrap_or("M-C".into());
+    let sync_key = binds.sync_key.unwrap_or("M-S".into());
 
     run_cmd!(
         tmux bind-key $install_key display-popup r"ahiru-tpm install --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
         tmux bind-key $update_key display-popup r"ahiru-tpm update --all --load; echo $'\n--- Done. Press ESC to close this popup. ---'";
         tmux bind-key $clean_key display-popup r"ahiru-tpm clean; echo $'\n--- Done. Press ESC to close this popup. ---'";
+        tmux bind-key $sync_key display-popup r"ahiru-tpm sync; echo $'\n--- Done. Press ESC to close this popup. ---'";
     )
     .context("Failed to setup keymaps")
 }
