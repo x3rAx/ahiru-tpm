@@ -12,10 +12,10 @@ pub async fn install(args: InstallArgs) -> Result<()> {
         load()?;
     }
 
-    println!();
-    println!("==> Done installing plugins.");
+    eprintln!();
+    eprintln!("==> Done installing plugins.");
     if args.load {
-        println!("==> Plugins have been reloaded.");
+        eprintln!("==> Plugins have been reloaded.");
     }
 
     Ok(())
@@ -32,9 +32,9 @@ pub fn update(args: UpdateArgs) -> Result<()> {
         load()?;
     }
 
-    println!("==> Done updating plugins.");
+    eprintln!("==> Done updating plugins.");
     if args.load {
-        println!("==> Plugins have been reloaded.");
+        eprintln!("==> Plugins have been reloaded.");
     }
 
     Ok(())
@@ -43,16 +43,16 @@ pub fn update(args: UpdateArgs) -> Result<()> {
 pub fn load() -> Result<()> {
     load::load()?;
 
-    println!();
-    println!("==> Plugins have been reloaded.");
+    eprintln!();
+    eprintln!("==> Plugins have been reloaded.");
     Ok(())
 }
 
 pub fn clean() -> Result<()> {
     clean::clean()?;
 
-    println!();
-    println!("==> Done cleaning plugins.");
+    eprintln!();
+    eprintln!("==> Done cleaning plugins.");
 
     Ok(())
 }
@@ -61,9 +61,9 @@ pub async fn sync() -> Result<()> {
     sync::sync().await?;
     load::load()?;
 
-    println!();
-    println!("==> Done syncing plugins.");
-    println!("==> Plugins have been reloaded.");
+    eprintln!();
+    eprintln!("==> Done syncing plugins.");
+    eprintln!("==> Plugins have been reloaded.");
 
     Ok(())
 }
