@@ -15,3 +15,14 @@ command = ["cargo", "run", "--", "load"]
 need_stdout = true
 allow_warnings = true
 background = true
+
+[jobs.run-clean-install]
+command = [
+    "bash",
+    "-c",
+    "rm -rf ~/.local/share/tmux/plugins; cargo run -- install",
+]
+need_stdout = true
+allow_warnings = true
+background = true
+before = []
