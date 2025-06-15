@@ -10,7 +10,7 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     env_logger::builder()
-        .filter_level(log::LevelFilter::Info)
+        .filter_level(log::LevelFilter::Warn)
         .init();
 
     match args.action {
