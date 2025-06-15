@@ -91,7 +91,7 @@ async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
 
     for plugin in plugins {
         tasks.push(task::spawn(async move {
-            println!("Installing plugin {}", plugin);
+            eprintln!("Installing plugin {}", plugin);
             install_plugin(plugin)
         }));
     }
@@ -101,9 +101,9 @@ async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
         let result = result.context("Task panicked!")?.context("Task failed")?;
 
         if result.result.is_ok() {
-            println!("Installed plugin: {}", result.plugin);
+            eprintln!("Installed plugin: {}", result.plugin);
         } else {
-            println!("Failed to install plugin: {}", &result.plugin);
+            eprintln!("Failed to install plugin: {}", &result.plugin);
         }
 
         results.push(result);

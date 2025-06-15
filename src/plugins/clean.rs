@@ -26,7 +26,7 @@ pub fn clean() -> Result<()> {
         let path_str = entry.to_str().context("Path is not valid UTF-8")?;
 
         if !plugin_set.contains(path_str) {
-            println!("Removing {path_str}");
+            eprintln!("Removing {path_str}");
             run_cmd!(rm -rf $path_str)?
         }
     }
