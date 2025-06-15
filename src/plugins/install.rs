@@ -1,7 +1,8 @@
 use std::io;
 
 use anyhow::{Context, Error, Result, anyhow};
-use cmd_lib::{FunChildren, run_cmd, spawn_with_output};
+use cmd_lib::{FunChildren, spawn_with_output};
+use colored::Colorize;
 use futures::{StreamExt, stream::FuturesUnordered};
 use tokio::task;
 
@@ -38,15 +39,41 @@ pub async fn install() -> Result<()> {
     };
 
     for result in results {
-        if let Err(err) = result.result {
-            println!();
-            println!("Error installing plugin {}", result.plugin);
-            println!("--- stdout: ---\n{}\n", result.stdout.prefix_lines("out> "));
-            println!("--- stderr: ---\n{}\n", result.stderr.prefix_lines("err> "));
-            println!("Error: {}", err);
+        if result.result.is_err() {
+            print_error(result);
         }
     }
     Ok(())
+}
+
+fn print_error(result: InstallResult) {
+    eprintln!();
+    eprintln!(
+        "{}",
+        format!(r#"Failed to install plugin "{}""#, result.plugin)
+            .bold()
+            .red()
+    );
+
+    eprint!(
+        "{}",
+        result
+            .stdout
+            .prefix_lines(&"  out> ".bold().green().to_string())
+    );
+    if !result.stdout.is_empty() && !result.stdout.ends_with("\n") {
+        eprintln!()
+    }
+
+    eprint!(
+        "{}",
+        result
+            .stderr
+            .prefix_lines(&"  err-out> ".bold().red().to_string())
+    );
+    if !result.stdout.is_empty() && !result.stderr.ends_with("\n") {
+        eprintln!()
+    }
 }
 
 fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
