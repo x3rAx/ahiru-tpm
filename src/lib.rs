@@ -4,6 +4,7 @@ pub mod cmd;
 pub mod key_bindings;
 pub mod plugin;
 pub mod plugins;
+pub mod prefix_lines;
 pub mod repo_url;
 pub mod spec;
 pub mod tmux;
