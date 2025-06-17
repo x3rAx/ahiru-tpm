@@ -14,7 +14,6 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     flake-utils,
     rust-overlay,
@@ -23,13 +22,11 @@
   }:
     flake-utils.lib.eachDefaultSystem (
       system: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            self.overlays.${system}.default
-            (import rust-overlay)
-          ];
-        };
+        overlays = [
+          (import rust-overlay)
+        ];
+
+        pkgs = import nixpkgs {inherit system overlays;};
 
         getRustToolchain = pkgs: pkgs.rust-bin.stable.latest.default;
 
@@ -44,18 +41,14 @@
             in
               isCargoSource || isPestFile;
           };
-      in {
+      in rec {
         devShells.default = import ./shell.nix {
           inherit pkgs;
           rust-toolchain = getRustToolchain pkgs;
         };
 
         packages = {
-          default = pkgs.ahiru-tpm;
-          ahiru-tpm = pkgs.ahiru-tpm;
-        };
-
-        overlays.default = final: prev: {
+          default = packages.ahiru-tpm;
           ahiru-tpm = craneLib.buildPackage {src = cleanCargoSource ./.;};
         };
       }
