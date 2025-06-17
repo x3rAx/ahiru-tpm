@@ -101,7 +101,7 @@ and through home-manager:
 
     ahiru-tpm = {
       # Use the GitHub mirror here because using the Codeberg url fails for some reason
-      url = "github:x3ro/ahiru-tpm";
+      url = "github:x3rAx/ahiru-tpm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -140,14 +140,14 @@ and through home-manager:
 
 </details>
 
-In essence, add `github:x3ro/ahiru-tpm` to your inputs:
+In essence, add `github:x3rAx/ahiru-tpm` to your inputs:
 
 ```nix
 {
   inputs = {
     ahiru-tpm = {
       # Use the GitHub mirror here because using the Codeberg url fails for some reason
-      url = "github:x3ro/ahiru-tpm";
+      url = "github:x3rAx/ahiru-tpm";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
