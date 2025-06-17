@@ -1,11 +1,14 @@
-{pkgs ? import <nixpkgs> {}}:
+{
+  pkgs ? import <nixpkgs> {},
+  rust-toolchain ? pkgs.rust-bin.stable.latest.default,
+}:
 pkgs.mkShell {
   name = "nix-shell";
 
   packages = with pkgs; [
     bashInteractive
 
-    (rust-bin.stable.latest.default.override {
+    (rust-toolchain.override {
       extensions = [
         "rust-src"
         "rust-analyzer"
@@ -14,8 +17,6 @@ pkgs.mkShell {
     })
     bacon # CLI test runner
     cargo-watch
-
-    cargo2nix
 
     #openssl.dev
     #pkgconfig # Required to find openssl
