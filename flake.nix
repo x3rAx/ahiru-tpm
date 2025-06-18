@@ -51,6 +51,11 @@
           default = packages.ahiru-tpm;
           ahiru-tpm = craneLib.buildPackage {src = cleanCargoSource ./.;};
         };
+
+        overlays = {
+          default = overlays.ahiru-tpm;
+          ahiru-tpm = (_final: _prev: {ahiru-tpm = packages.ahiru-tpm;});
+        };
       }
     );
 }
