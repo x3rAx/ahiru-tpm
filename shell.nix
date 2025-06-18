@@ -1,6 +1,7 @@
 {
   pkgs ? import <nixpkgs> {},
-  rust-toolchain ? pkgs.rust-bin.stable.latest.default,
+  fenix ? import (fetchTarball "https://github.com/nix-community/fenix/archive/main.tar.gz") {},
+  fenix-shell-profile ? fenix.stable,
 }:
 pkgs.mkShell {
   name = "nix-shell";
@@ -8,13 +9,12 @@ pkgs.mkShell {
   packages = with pkgs; [
     bashInteractive
 
-    (rust-toolchain.override {
-      extensions = [
+    (fenix-shell-profile.withComponents [
+        "cargo"
         "rust-src"
         "rust-analyzer"
         "clippy"
-      ];
-    })
+    ])
     bacon # CLI test runner
     cargo-watch
 
