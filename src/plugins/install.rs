@@ -1,15 +1,14 @@
-use std::{io, time::Duration};
+use std::io;
 
 use anyhow::{Context, Error, Result, anyhow};
 use cmd_lib::{FunChildren, spawn_with_output};
 use colored::Colorize;
 use futures::{StreamExt, stream::FuturesUnordered};
-use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use tokio::task;
 
 use crate::{
-    plugin::Plugin, prefix_lines::PrefixLines, tmux::ensure_plugins_dir_exists,
-    truncate_ellipsis::TruncateEllipsis,
+    plugin::Plugin, prefix_lines::PrefixLines, progress_status::ProgressStatus,
+    tmux::ensure_plugins_dir_exists, truncate_ellipsis::TruncateEllipsis,
 };
 
 struct InstallResult {
@@ -94,40 +93,19 @@ fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
 async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
     let mut tasks: FuturesUnordered<task::JoinHandle<std::result::Result<InstallResult, Error>>> =
         FuturesUnordered::new();
-    let mp = MultiProgress::new();
+    let progress = ProgressStatus::new();
 
     for plugin in plugins {
         let plugin_name = plugin.to_string().truncate_ellipsis(62);
-
-        let pb = mp.add(ProgressBar::new_spinner());
-        pb.set_message(
-            format!("{:<64} {}", plugin_name, "Installing")
-        );
-        pb.enable_steady_tick(Duration::from_millis(100));
-        pb.set_style(
-            ProgressStyle::with_template("{spinner:.cyan} {msg}")
-                .context("Failed to set progress style")?,
-        );
+        let pt = progress.add_task(&plugin_name, "Installing")?;
 
         tasks.push(task::spawn(async move {
             let res = install_plugin(plugin)?;
 
             if res.result.is_ok() {
-                pb.set_style(
-                    ProgressStyle::with_template(&format!("{} {}", "✔".bold().green(), "{msg}"))
-                        .context("Failed to set progress style")?,
-                );
-                pb.finish_with_message(
-                    format!("{:<64} {}", plugin_name, "Done"),
-                );
+                pt.set_success("Done")?;
             } else {
-                pb.set_style(
-                    ProgressStyle::with_template(&format!("{} {}", "✘".bold().red(), "{msg}"))
-                        .context("Failed to set progress style")?,
-                );
-                pb.finish_with_message(
-                    format!("{:<64} {}", plugin_name, "Failed".bold().red()),
-                );
+                pt.set_failed("Failed")?;
             }
 
             Ok(res)
