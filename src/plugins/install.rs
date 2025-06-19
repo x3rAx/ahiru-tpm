@@ -1,12 +1,16 @@
-use std::io;
+use std::{io, time::Duration};
 
 use anyhow::{Context, Error, Result, anyhow};
 use cmd_lib::{FunChildren, spawn_with_output};
 use colored::Colorize;
 use futures::{StreamExt, stream::FuturesUnordered};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use tokio::task;
 
-use crate::{plugin::Plugin, prefix_lines::PrefixLines, tmux::ensure_plugins_dir_exists};
+use crate::{
+    plugin::Plugin, prefix_lines::PrefixLines, tmux::ensure_plugins_dir_exists,
+    truncate_ellipsis::TruncateEllipsis,
+};
 
 struct InstallResult {
     plugin: Plugin,
@@ -48,6 +52,8 @@ pub async fn install() -> Result<()> {
 
 fn print_error(result: InstallResult) {
     eprintln!();
+    eprintln!();
+
     eprintln!(
         "{}",
         format!(r#"Failed to install plugin "{}""#, result.plugin)
@@ -88,23 +94,49 @@ fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
 async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
     let mut tasks: FuturesUnordered<task::JoinHandle<std::result::Result<InstallResult, Error>>> =
         FuturesUnordered::new();
+    let mp = MultiProgress::new();
 
     for plugin in plugins {
+        let plugin_name = plugin.to_string().truncate_ellipsis(62);
+
+        let pb = mp.add(ProgressBar::new_spinner());
+        pb.set_message(
+            format!("{:<64} {}", plugin_name, "Installing")
+        );
+        pb.enable_steady_tick(Duration::from_millis(100));
+        pb.set_style(
+            ProgressStyle::with_template("{spinner:.cyan} {msg}")
+                .context("Failed to set progress style")?,
+        );
+
         tasks.push(task::spawn(async move {
-            eprintln!("Installing plugin {}", plugin);
-            install_plugin(plugin)
+            let res = install_plugin(plugin)?;
+
+            if res.result.is_ok() {
+                pb.set_style(
+                    ProgressStyle::with_template(&format!("{} {}", "✔".bold().green(), "{msg}"))
+                        .context("Failed to set progress style")?,
+                );
+                pb.finish_with_message(
+                    format!("{:<64} {}", plugin_name, "Done"),
+                );
+            } else {
+                pb.set_style(
+                    ProgressStyle::with_template(&format!("{} {}", "✘".bold().red(), "{msg}"))
+                        .context("Failed to set progress style")?,
+                );
+                pb.finish_with_message(
+                    format!("{:<64} {}", plugin_name, "Failed".bold().red()),
+                );
+            }
+
+            Ok(res)
         }));
     }
 
     let mut results = vec![];
     while let Some(result) = tasks.next().await {
         let result = result.context("Task panicked!")?.context("Task failed")?;
-
-        if result.result.is_ok() {
-            eprintln!("Installed plugin: {}", result.plugin);
-        } else {
-            eprintln!("Failed to install plugin: {}", &result.plugin);
-        }
 
         results.push(result);
     }
