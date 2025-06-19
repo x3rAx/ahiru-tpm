@@ -129,7 +129,9 @@ and through home-manager:
       "nixos" = nixpkgs.lib.nixosSystem {
         modules = [
           ({pkgs, ...}: {
-            environment.systemPackages = [ahiru-tpm.packages.${pkgs.system}.default];
+            environment.systemPackages = [
+                ahiru-tpm.packages.${pkgs.system}.default
+            ];
           })
         ];
       };
@@ -141,7 +143,9 @@ and through home-manager:
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         modules = [
           ({pkgs, ...}: {
-            home.packages = [ahiru-tpm.packages.${pkgs.system}.default];
+            home.packages = [
+                ahiru-tpm.packages.${pkgs.system}.default
+            ];
           })
         ];
       };
@@ -172,6 +176,14 @@ Then add the following to your packages list:
 
 ```nix
 ahiru-tpm.packages.${pkgs.system}.default
+```
+
+Or use the overlay:
+
+```nix
+nixpkgs.overlays = [
+    ahiru-tpm.overlays.${pkgs.system}.default
+]
 ```
 
 ### Build from source
