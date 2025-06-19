@@ -84,8 +84,8 @@ your tmux config (either in `~/.tmux.conf` or
     # set -g @plugin 'https://codeberg.org/user/plugin_name'
     # set -g @plugin 'git@codeberg.org:user/plugin_name'
 
-# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
-run 'ahiru-tpm init'
+# Initialize Ahiru-TPM (keep this line at the very bottom of tmux.conf)
+run 'ahiru-tpm load'
 ```
 
 Then proceed with one of the following install methods to get **Ahiru-TPM**
