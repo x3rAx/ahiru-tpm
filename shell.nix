@@ -35,5 +35,7 @@ in
         #openssl.dev
         #pkgconfig # Required to find openssl
         #lldb # Install lldb with `lldb-dap` (aka `lldb-vscode`)
+
+        just # Command runner for `justfile`
       ];
     }
