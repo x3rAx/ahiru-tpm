@@ -25,9 +25,10 @@ in
 
         (fenix-shell-profile.withComponents [
           "cargo"
-          "rust-src"
-          "rust-analyzer"
           "clippy"
+          "rust-analyzer"
+          "rust-src"
+          "rustfmt"
         ])
         bacon # CLI test runner
         cargo-watch
