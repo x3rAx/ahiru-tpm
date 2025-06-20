@@ -32,11 +32,6 @@ pub async fn update(args: UpdateArgs) -> Result<()> {
         load()?;
     }
 
-    eprintln!("==> Done updating plugins.");
-    if args.load {
-        eprintln!("==> Plugins have been reloaded.");
-    }
-
     Ok(())
 }
 
