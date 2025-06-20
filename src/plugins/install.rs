@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io};
+use std::collections::HashMap;
 
 use anyhow::{Context, Error, Result, anyhow};
 use cmd_lib::{FunChildren, spawn_with_output};
@@ -11,23 +11,7 @@ use crate::{
     tmux::ensure_plugins_dir_exists, truncate_ellipsis::TruncateEllipsis,
 };
 
-struct InstallResult {
-    plugin: Plugin,
-    result: Result<(), io::Error>,
-    stdout: String,
-    stderr: String,
-}
-
-impl InstallResult {
-    fn new(plugin: Plugin, output: (Result<(), io::Error>, String, String)) -> InstallResult {
-        InstallResult {
-            plugin,
-            result: output.0,
-            stdout: output.1,
-            stderr: output.2,
-        }
-    }
-}
+use super::action_result::ActionResult;
 
 pub async fn install() -> Result<()> {
     let plugins = super::get_plugins()?
@@ -49,7 +33,7 @@ pub async fn install() -> Result<()> {
     Ok(())
 }
 
-fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
+fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<ActionResult>> {
     let mut results = vec![];
 
     let progress = ProgressStatus::new();
@@ -81,8 +65,8 @@ fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
     Ok(results)
 }
 
-async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
-    let mut tasks: FuturesUnordered<task::JoinHandle<std::result::Result<InstallResult, Error>>> =
+async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<ActionResult>> {
+    let mut tasks: FuturesUnordered<task::JoinHandle<std::result::Result<ActionResult, Error>>> =
         FuturesUnordered::new();
     let progress = ProgressStatus::new();
 
@@ -115,7 +99,7 @@ async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
     Ok(results)
 }
 
-fn install_plugin(plugin: Plugin) -> Result<InstallResult> {
+fn install_plugin(plugin: Plugin) -> Result<ActionResult> {
     if plugin.is_installed() {
         return Err(anyhow!("Plugin already installed: {plugin}"));
     }
@@ -139,10 +123,10 @@ fn install_plugin(plugin: Plugin) -> Result<InstallResult> {
     ))?;
     let out = proc.wait_with_all();
 
-    Ok(InstallResult::new(plugin, out))
+    Ok(ActionResult::new(plugin, out))
 }
 
-fn print_error(result: InstallResult) {
+fn print_error(result: ActionResult) {
     eprintln!();
     eprintln!();
 
