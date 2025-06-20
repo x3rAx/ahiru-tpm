@@ -12,12 +12,6 @@ pub async fn install(args: InstallArgs) -> Result<()> {
         load()?;
     }
 
-    eprintln!();
-    eprintln!("==> Done installing plugins.");
-    if args.load {
-        eprintln!("==> Plugins have been reloaded.");
-    }
-
     Ok(())
 }
 
