@@ -1,4 +1,4 @@
-use std::io;
+use std::{collections::HashMap, io};
 
 use anyhow::{Context, Error, Result, anyhow};
 use cmd_lib::{FunChildren, spawn_with_output};
@@ -83,9 +83,32 @@ fn print_error(result: InstallResult) {
 
 fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
     let mut results = vec![];
+
+    let progress = ProgressStatus::new();
+    let mut plugin_progresses = HashMap::new();
+
+    for plugin in &plugins {
+        let plugin_name = plugin.to_string().truncate_ellipsis(62);
+        let pt = progress.add_task(&plugin_name, "Waiting")?;
+        plugin_progresses.insert(plugin.to_string(), pt);
+    }
+
     for plugin in plugins {
-        let result = install_plugin(plugin)?;
-        results.push(result);
+        let pt = plugin_progresses
+            .get(&plugin.to_string())
+            .expect("Plugin progress should be in map");
+
+        pt.set_status("Installing")?;
+
+        let res = install_plugin(plugin)?;
+
+        if res.result.is_ok() {
+            pt.set_success("Done")?;
+        } else {
+            pt.set_failed("Failed")?;
+        }
+
+        results.push(res);
     }
     Ok(results)
 }
@@ -97,9 +120,11 @@ async fn install_parallel(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
 
     for plugin in plugins {
         let plugin_name = plugin.to_string().truncate_ellipsis(62);
-        let pt = progress.add_task(&plugin_name, "Installing")?;
+        let pt = progress.add_task(&plugin_name, "Waiting")?;
 
         tasks.push(task::spawn(async move {
+            pt.set_status("Installing")?;
+
             let res = install_plugin(plugin)?;
 
             if res.result.is_ok() {
