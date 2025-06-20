@@ -49,38 +49,6 @@ pub async fn install() -> Result<()> {
     Ok(())
 }
 
-fn print_error(result: InstallResult) {
-    eprintln!();
-    eprintln!();
-
-    eprintln!(
-        "{}",
-        format!(r#"Failed to install plugin "{}""#, result.plugin)
-            .bold()
-            .red()
-    );
-
-    eprint!(
-        "{}",
-        result
-            .stdout
-            .prefix_lines(&"  out> ".bold().green().to_string())
-    );
-    if !result.stdout.is_empty() && !result.stdout.ends_with("\n") {
-        eprintln!()
-    }
-
-    eprint!(
-        "{}",
-        result
-            .stderr
-            .prefix_lines(&"  err-out> ".bold().red().to_string())
-    );
-    if !result.stdout.is_empty() && !result.stderr.ends_with("\n") {
-        eprintln!()
-    }
-}
-
 fn install_sequential(plugins: Vec<Plugin>) -> Result<Vec<InstallResult>> {
     let mut results = vec![];
 
@@ -172,4 +140,36 @@ fn install_plugin(plugin: Plugin) -> Result<InstallResult> {
     let out = proc.wait_with_all();
 
     Ok(InstallResult::new(plugin, out))
+}
+
+fn print_error(result: InstallResult) {
+    eprintln!();
+    eprintln!();
+
+    eprintln!(
+        "{}",
+        format!(r#"Failed to install plugin "{}""#, result.plugin)
+            .bold()
+            .red()
+    );
+
+    eprint!(
+        "{}",
+        result
+            .stdout
+            .prefix_lines(&"  out> ".bold().green().to_string())
+    );
+    if !result.stdout.is_empty() && !result.stdout.ends_with("\n") {
+        eprintln!()
+    }
+
+    eprint!(
+        "{}",
+        result
+            .stderr
+            .prefix_lines(&"  err-out> ".bold().red().to_string())
+    );
+    if !result.stdout.is_empty() && !result.stderr.ends_with("\n") {
+        eprintln!()
+    }
 }
