@@ -12,15 +12,11 @@ pub fn update_all() -> Result<()> {
         .filter(|plugin| plugin.is_installed())
         .collect();
 
-    if super::do_parallel() {
-        plugins.par_iter().try_for_each(update_plugin)
-    } else {
-        plugins.iter().try_for_each(update_plugin)
-    }
+    update_plugins(plugins)
 }
 
 pub fn update_list<T: AsRef<str>>(names: &[T]) -> Result<()> {
-    let plugin_map: HashMap<_, _> = super::get_plugins()?
+    let mut plugin_map: HashMap<_, _> = super::get_plugins()?
         .into_iter()
         .map(|plugin| (plugin.name().to_owned(), plugin))
         .collect();
@@ -30,17 +26,19 @@ pub fn update_list<T: AsRef<str>>(names: &[T]) -> Result<()> {
         .map(|name| {
             let name = name.as_ref();
             plugin_map
-                .get(name)
+                .remove(name)
                 .context(format!("Unknown plugin name: {}", name))
         })
         .collect::<Result<Vec<_>>>()?;
 
+    update_plugins(plugins)
+}
+
+fn update_plugins(plugins: Vec<Plugin>) -> Result<()> {
     if super::do_parallel() {
-        plugins
-            .par_iter()
-            .try_for_each(|plugin| update_plugin(plugin))
+        plugins.par_iter().try_for_each(update_plugin)
     } else {
-        plugins.iter().try_for_each(|plugin| update_plugin(plugin))
+        plugins.iter().try_for_each(update_plugin)
     }
 }
 
