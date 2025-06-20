@@ -21,11 +21,11 @@ pub async fn install(args: InstallArgs) -> Result<()> {
     Ok(())
 }
 
-pub fn update(args: UpdateArgs) -> Result<()> {
+pub async fn update(args: UpdateArgs) -> Result<()> {
     if args.all {
-        update::update_all()?;
+        update::update_all().await?;
     } else {
-        update::update_list(&args.names)?;
+        update::update_list(&args.names).await?;
     }
 
     if args.load {
