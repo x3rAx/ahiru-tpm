@@ -1,8 +1,6 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, fs::remove_dir_all};
 
 use anyhow::{Context, Result};
-use cmd_lib::run_cmd;
-use glob::glob;
 
 use crate::tmux::{self};
 
@@ -19,16 +17,27 @@ pub fn clean() -> Result<()> {
         .collect::<Result<HashSet<_>>>()?;
 
     let plugin_dir = tmux::get_plugins_dir();
-    let plugin_dir_str = plugin_dir.to_str().context("Path is not valid UTF-8")?;
 
-    for entry in glob(&format!("{plugin_dir_str}/*"))? {
+    // List entries in plugin_dir
+    for entry in plugin_dir
+        .read_dir()
+        .context("Failed to read plugin directory")?
+    {
         let entry = entry?;
-        let path_str = entry.to_str().context("Path is not valid UTF-8")?;
+        let file_type = entry.file_type()?;
+
+        if !file_type.is_dir() {
+            continue;
+        }
+
+        let path = entry.path();
+        let path_str = path.to_str().context("Path is not valid UTF-8")?;
 
         if !plugin_set.contains(path_str) {
-            eprintln!("Removing {path_str}");
-            run_cmd!(rm -rf $path_str)?
+            eprintln!("-> Removing {path_str}");
+            remove_dir_all(path)?;
         }
     }
+
     Ok(())
 }

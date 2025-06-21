@@ -40,8 +40,7 @@ pub fn load() -> Result<()> {
 pub fn clean() -> Result<()> {
     clean::clean()?;
 
-    eprintln!();
-    eprintln!("==> Done cleaning plugins.");
+    eprintln!("==> Done");
 
     Ok(())
 }
