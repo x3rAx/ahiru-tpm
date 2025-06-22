@@ -1,5 +1,6 @@
 mod action_result;
 pub mod clean;
+pub mod init;
 pub mod install;
 pub mod load;
 pub mod sync;

@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{
     args::{InstallArgs, UpdateArgs},
-    plugins::{clean, install, load, sync, update},
+    plugins::{clean, init, install, load, sync, update},
 };
 
 pub async fn install(args: InstallArgs) -> Result<()> {
@@ -51,4 +51,8 @@ pub async fn sync() -> Result<()> {
     eprintln!("==> Plugins have been reloaded.");
 
     Ok(())
+}
+
+pub fn init() -> Result<()> {
+    init::init()
 }
