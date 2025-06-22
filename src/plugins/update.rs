@@ -64,7 +64,8 @@ fn update_sequential(plugins: Vec<Plugin>) -> Result<Vec<ActionResult>> {
 
     for plugin in &plugins {
         let plugin_name = plugin.to_string().truncate_ellipsis(62);
-        let pt = progress.add_task(&plugin_name, "Waiting")?;
+        let task_name = format!("Updating {plugin_name}");
+        let pt = progress.add_task(&task_name, "Waiting")?;
         plugin_progresses.insert(plugin.to_string(), pt);
     }
 
@@ -96,7 +97,8 @@ async fn update_parallel(plugins: Vec<Plugin>) -> Result<Vec<ActionResult>> {
 
     for plugin in plugins {
         let plugin_name = plugin.to_string().truncate_ellipsis(62);
-        let pt = progress.add_task(&plugin_name, "Waiting")?;
+        let task_name = format!("Updating {plugin_name}");
+        let pt = progress.add_task(&task_name, "Waiting")?;
 
         tasks.push(task::spawn(async move {
             pt.set_status("Updating")?;
