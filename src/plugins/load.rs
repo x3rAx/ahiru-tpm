@@ -5,10 +5,9 @@ use is_executable::IsExecutable;
 use log::info;
 use rayon::prelude::*;
 
-use crate::{plugin::Plugin, tmux};
+use crate::plugin::Plugin;
 
 pub fn load() -> Result<()> {
-    tmux::setup_keymaps()?;
     let plugins = super::get_plugins()?;
     let (parallel, non_parallel) = plugins.into_iter().partition::<Vec<_>, _>(|p| p.parallel());
 

@@ -19,5 +19,6 @@ async fn main() -> Result<()> {
         Action::Load => cmd::load(),
         Action::Clean => cmd::clean(),
         Action::Sync => cmd::sync().await,
+        Action::Init => cmd::init(),
     }
 }

@@ -19,6 +19,8 @@ pub enum Action {
     Clean,
     /// Run `install`, `clean` and `update --all` in one go
     Sync,
+    /// Initialize Ahiru-TPM and load plugins
+    Init,
 }
 
 #[derive(Parser, Debug)]
