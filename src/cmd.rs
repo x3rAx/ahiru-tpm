@@ -32,7 +32,6 @@ pub async fn update(args: UpdateArgs) -> Result<()> {
 pub fn load() -> Result<()> {
     load::load()?;
 
-    eprintln!();
     eprintln!("==> Plugins have been reloaded.");
     Ok(())
 }
@@ -49,8 +48,6 @@ pub async fn sync() -> Result<()> {
     sync::sync().await?;
     load::load()?;
 
-    eprintln!();
-    eprintln!("==> Done syncing plugins.");
     eprintln!("==> Plugins have been reloaded.");
 
     Ok(())
