@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf};
+use std::{env::current_dir, fs, path::PathBuf};
 
 use anyhow::{Context, Result, anyhow};
 use cmd_lib::run_fun;
@@ -60,8 +60,10 @@ pub fn setup_keymaps() -> Result<()> {
 
 /// Get the CWD in which tmux was initially started
 pub fn get_start_path() -> Result<PathBuf> {
-    Ok(PathBuf::from(
-        run_fun!(tmux display -pt 0 -F "#{pane_start_path}")
-            .context("Failed to get tmux start path")?,
-    ))
+    match run_fun!(tmux display -pt 0 -F "#{pane_start_path}") {
+        Ok(path) => Ok(PathBuf::from(path)),
+        Err(err) => current_dir().with_context(|| {
+            format!("Failed to get current directory after getting tmux start path failed: {err}")
+        }),
+    }
 }
