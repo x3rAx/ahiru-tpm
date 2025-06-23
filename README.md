@@ -85,7 +85,7 @@ your tmux config (either in `~/.tmux.conf` or
     # set -g @plugin 'git@codeberg.org:user/plugin_name'
 
 # Initialize Ahiru-TPM (keep this line at the very bottom of tmux.conf)
-run 'ahiru-tpm load'
+run 'ahiru-tpm init'
 ```
 
 Then proceed with one of the following install methods to get **Ahiru-TPM**
@@ -418,7 +418,7 @@ _Note: The screenshot shows **Ahiru-TPM** as `tpm-rs`, which was the prototype n
 ### 5x Faster Plugins Loading
 
 ```sh
-hyperfine --warmup 10 --runs 100 --shell nu -n 'ahiru-tpm' 'ahiru-tpm load' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/scripts/source_plugins.sh'
+hyperfine --warmup 10 --runs 100 --shell nu -n 'ahiru-tpm' 'ahiru-tpm init' -n 'tpm' 'TMUX_PLUGIN_MANAGER_PATH=($env.HOME)/.config/tmux/plugins/ ~/.config/tmux/plugins/tpm/scripts/source_plugins.sh'
 ```
 
 ![Benchmark loading plugins with `ahiru-tpm` vs. `tpm`. `ahiru-tpm` ran 5.62 times faster than `tpm`.](.res/hyperfine-tpm-load.png)
