@@ -22,8 +22,6 @@ bump version: ensure-cargo-bump
     command -v cargo-bump >/dev/null 2>&1 || just install-cargo-bump;
     # Bump version
     cargo bump '{{version}}'
-    # Run cargo2nix
-    cargo2nix --overwrite
 
 
 test-gh-action--post-issue:
