@@ -1,8 +1,11 @@
+use std::process::exit;
+
 use anyhow::Result;
 
 use crate::{
     args::{InstallArgs, UpdateArgs},
     plugins::{clean, init, install, load, sync, update},
+    tmux::is_tmux_running,
 };
 
 pub async fn install(args: InstallArgs) -> Result<()> {
@@ -30,6 +33,10 @@ pub async fn update(args: UpdateArgs) -> Result<()> {
 }
 
 pub fn load() -> Result<()> {
+    if !is_tmux_running() {
+        eprintln!("WARN: Tmux is not running, plugins are not reloaded.");
+        return Ok(());
+    }
     load::load()?;
 
     eprintln!("==> Plugins have been reloaded.");
@@ -46,13 +53,14 @@ pub fn clean() -> Result<()> {
 
 pub async fn sync() -> Result<()> {
     sync::sync().await?;
-    load::load()?;
-
-    eprintln!("==> Plugins have been reloaded.");
-
-    Ok(())
+    load()
 }
 
 pub fn init() -> Result<()> {
+    if !is_tmux_running() {
+        eprintln!("ERROR: Tmux is not running");
+        exit(1);
+    }
+
     init::init()
 }

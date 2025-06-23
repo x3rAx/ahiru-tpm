@@ -1,6 +1,7 @@
 use std::{env::current_dir, fs, path::PathBuf};
 
 use anyhow::{Context, Result, anyhow};
+use cached::proc_macro::cached;
 use cmd_lib::run_fun;
 
 use crate::key_bindings;
@@ -66,4 +67,9 @@ pub fn get_start_path() -> Result<PathBuf> {
             format!("Failed to get current directory after getting tmux start path failed: {err}")
         }),
     }
+}
+
+#[cached]
+pub fn is_tmux_running() -> bool {
+    run_fun!(tmux display -p).is_ok()
 }
